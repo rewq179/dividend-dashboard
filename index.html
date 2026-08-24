@@ -17,14 +17,13 @@
    라이트 모드 aqua는 2.74:1로 3:1 미달이라 칩에 글리프+라벨을 반드시 함께 둔다. */
 :root{
   color-scheme:light;
-  /* 배경은 밝게 두고, 구역 구분은 패널 머리 띠(panel2)와 테두리·그림자가 맡는다 */
-  --bg:#f4f3ef; --panel:#fdfcf8; --panel2:#f4efe3;
-  --line:#dcd4c2; --rule:#b5aa93;
-  --tx:#0b0b0b; --tx2:#514e46; --tx3:#6d6759;
-  --shadow:0 1px 2px rgba(70,58,34,.07), 0 1px 1px rgba(70,58,34,.04);
-  /* 표 머리는 아이보리로 띠와 결을 맞추고, 행 줄무늬는 중립 회색으로 둔다.
-     줄무늬까지 베이지면 표 전체가 누렇게 깔려 숫자가 묻힌다 */
-  --thead:#f8f4e8; --stripe:#f2f2f0;
+  /* 바탕은 흰색이고, 구역 구분은 패널 테두리·그림자와 머리 띠(panel2)가 맡는다.
+     띠와 표 머리까지 중립 회색으로 맞춘다 — 한 곳만 베이지면 그 자리만 누렇게 뜬다 */
+  --bg:#ffffff; --panel:#ffffff; --panel2:#f4f5f7;
+  --line:#e1e4e8; --rule:#b6bac1;
+  --tx:#0b0b0b; --tx2:#4b4f55; --tx3:#686d75;
+  --shadow:0 1px 2px rgba(20,24,31,.07), 0 1px 1px rgba(20,24,31,.04);
+  --thead:#f5f6f8; --stripe:#f7f8f9;
   --accent:#2a78d6; --accent-soft:#e8f0ff;
   --pay:#2a78d6;   --pay-soft:#e8f0ff;
   --ex:#eb6834;    --ex-soft:#fdf1e3;
@@ -43,10 +42,10 @@
 }
 :root[data-theme="dark"]{
   color-scheme:dark;
-  --bg:#12110e; --panel:#1c1a16; --panel2:#252219;
-  --line:#332f27; --rule:#494336;
+  --bg:#1a1815; --panel:#24211c; --panel2:#2d2921;
+  --line:#3a352c; --rule:#4f493b;
   --tx:#ffffff; --tx2:#c9c4b6; --tx3:#8e887a;
-  --shadow:none; --thead:#262319; --stripe:#212120;
+  --shadow:none; --thead:#2e2a20; --stripe:#292723;
   --accent:#3987e5; --accent-soft:#22314f;
   --pay:#3987e5;   --pay-soft:#22314f;
   --ex:#d95926;    --ex-soft:#3a2f21;
@@ -59,10 +58,10 @@
 @media (prefers-color-scheme:dark){
   :root:where(:not([data-theme="light"])){
     color-scheme:dark;
-    --bg:#12110e; --panel:#1c1a16; --panel2:#252219;
-    --line:#332f27; --rule:#494336;
+    --bg:#1a1815; --panel:#24211c; --panel2:#2d2921;
+    --line:#3a352c; --rule:#4f493b;
     --tx:#ffffff; --tx2:#c9c4b6; --tx3:#8e887a;
-    --shadow:none; --thead:#262319; --stripe:#212120;
+    --shadow:none; --thead:#2e2a20; --stripe:#292723;
     --accent:#3987e5; --accent-soft:#22314f;
     --pay:#3987e5;   --pay-soft:#22314f;
     --ex:#d95926;    --ex-soft:#3a2f21;
@@ -234,6 +233,8 @@ body:has(.mask.on) .tabbar{display:none}
 .lim-val{font-size:26px; font-weight:700; letter-spacing:-.5px}
 .lim-val .unit{font-size:14px; font-weight:600; color:var(--tx2); margin-left:3px}
 .lim-note{font-size:12px; color:var(--tx3)}
+/* 두 문장을 한 줄에 이어 두면 어디까지가 사용량이고 어디부터가 여유인지 끊기지 않는다 */
+.lim-line{flex:1 0 100%}
 .lim-track{height:10px; background:var(--panel2); border:1px solid var(--line); border-radius:99px; overflow:hidden}
 .lim-fill{height:100%; background:var(--accent); border-radius:99px}
 .lim-fill.warn{background:var(--warn)}
@@ -385,7 +386,16 @@ td.today .d{font-weight:700; color:var(--tx)}
 .donut-side .ds-r{display:flex; align-items:baseline; gap:8px; font-size:12px; color:var(--tx3)}
 .donut-side .ds-r em{font-style:normal; min-width:4.5em}
 .donut-side .ds-r b{color:var(--tx2); font-size:12px; font-weight:600; font-variant-numeric:tabular-nums}
-.donut-side > i{margin-bottom:6px}
+.donut-side .ds-r i{font-style:normal}
+/* 합계 줄만 한 단계 크게 — 같은 형식이되 어느 것이 전체인지 크기로 갈린다 */
+.donut-side .ds-all{font-size:13px; color:var(--tx2); margin-bottom:2px}
+.donut-side .ds-all b{color:var(--tx); font-size:15px; font-weight:700}
+
+/* 고른 날로 스크롤할 때 sticky 계좌 필터 아래로 내려앉게 하는 여백 */
+.cal-row{scroll-margin-top:64px}
+
+/* 비중 바가 없는 리스트는 맨 아랫줄 왼쪽이 비므로 부가 설명을 그 자리에 둔다 */
+.rnote{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .donut.picked .donut-side .ds-h:not(.on){opacity:.45}
 
 /* ---- 홈 월별 흐름 막대 ----
@@ -870,19 +880,19 @@ table.data tr.more-row:hover{background:none}
         <input type="checkbox" id="netMode"><span class="track"></span>
         <span class="lb">세후 금액</span>
       </label>
+      <label class="switch" title="미국 종목의 평가금액·손익·연 배당을 달러로 표기합니다. 합계와 차트는 원화입니다">
+        <input type="checkbox" id="usdMode"><span class="track"></span>
+        <span class="lb">미장 달러 표시</span>
+      </label>
+    </div>
+    <div class="top" style="margin-bottom:12px">
       <label class="switch" title="표의 종목명을 달력과 같은 짧은 이름으로 줄입니다. 달력은 항상 짧은 이름을 씁니다">
         <input type="checkbox" id="shortName"><span class="track"></span>
         <span class="lb">짧은 이름</span>
       </label>
-    </div>
-    <div class="top" style="margin-bottom:12px">
       <label class="switch" title="화면의 모든 금액을 가립니다. 비율·수량·종목명은 그대로 남습니다">
         <input type="checkbox" id="blind"><span class="track"></span>
         <span class="lb">금액 가리기</span>
-      </label>
-      <label class="switch" title="미국 종목의 평가금액·손익·연 배당을 달러로 표기합니다. 합계와 차트는 원화입니다">
-        <input type="checkbox" id="usdMode"><span class="track"></span>
-        <span class="lb">미장은 달러로</span>
       </label>
     </div>
     <div class="top" style="margin-bottom:12px">
@@ -897,8 +907,6 @@ table.data tr.more-row:hover{background:none}
         <svg viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2m0 2.2V19.8a7.8 7.8 0 0 1 0-15.6"/></svg>테마</button>
     </div>
     <div class="top" style="margin-bottom:12px">
-      <button class="btn sm" id="exportBtn">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 3h2v9.2l3.1-3.1 1.4 1.4L12 16 6.5 10.5 7.9 9.1 11 12.2zM4 18h16v2.4H4z"/></svg>JSON 내보내기</button>
       <button class="btn sm" id="importBtn">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 15h-2V5.8L7.9 8.9 6.5 7.5 12 2l5.5 5.5-1.4 1.4L13 5.8zM4 18h16v2.4H4z"/></svg>JSON 불러오기</button>
       <!-- accept 를 두면 안드로이드가 확장자를 MIME 으로 못 읽어 카메라·사진 앱만 띄운다 -->
@@ -1319,7 +1327,7 @@ let state = {
   netMode: false,
   shortName: false,
   blind: false,
-  usdMode: false,
+  usdMode: true,
   sort: "annual",
   recView: "agg",
   tradeView: "buy",
@@ -1355,7 +1363,8 @@ function apply(d){
   state.netMode = !!d.netMode;
   state.shortName = !!d.shortName;
   state.blind = !!d.blind;
-  state.usdMode = !!d.usdMode;
+  // 켜 두는 것이 기본이다. 옛 데이터에는 이 키가 없어 undefined 가 오므로 그때만 기본값을 쓴다
+  state.usdMode = d.usdMode === undefined ? true : !!d.usdMode;
   state.sort = (d.sort && SORTS[d.sort]) ? d.sort : "annual";
   /* 패널별 필터는 진입할 때마다 전역 탭 값으로 되돌린다. state.account 는 저장되지 않아 항상
      "전체"로 시작하는데, 저장된 panelAcc 가 살아 있으면 헤더는 "전체"라고 말하면서 표는 한 계좌만
@@ -1952,8 +1961,8 @@ function renderLimit(){
   document.getElementById("limitBody").innerHTML = `
     <div class="lim-top">
       <span class="lim-val mono ${left < 0 ? "neg" : "recv"}">${won(Math.abs(left))}<span class="unit">원 ${left < 0 ? "초과" : "여유"}</span></span>
-      <span class="lim-note">${won(FIN_LIMIT)}원 중 ${won(taxed)}원 사용 (${pct(Math.min(ratio, 1))})${
-        left > 0 ? ` · 월 ${won(left / 12)}원까지 더 받아도 안전` : ""}</span>
+      <span class="lim-note lim-line">${won(FIN_LIMIT)}원 중 ${won(taxed)}원 사용 (${pct(Math.min(ratio, 1))})</span>
+      ${left > 0 ? `<span class="lim-note lim-line">월 ${won(left / 12)}원까지 더 받아도 안전</span>` : ""}
     </div>
     <div class="lim-track"><div class="lim-fill ${cls}" style="width:${Math.min(100, ratio * 100).toFixed(1)}%"></div></div>
     <div class="lim-rows">
@@ -2127,7 +2136,11 @@ function renderCalendar(){
     renderCalendar();
     if(!calSel) return;
     const row = document.querySelector(`#calList .cal-row[data-row="${calSel}"]`);
-    if(row) row.scrollIntoView({ block: "nearest" });
+    /* nearest 는 화면 안에만 들어오면 움직이지 않아 고른 날이 아래끝에 걸린 채로 남는다.
+       위로 올리되 sticky 계좌 필터에 가리지 않게 그 높이만큼 뺀다 */
+    /* nearest 는 화면 안에만 들어오면 움직이지 않아 고른 날이 아래끝에 걸린 채로 남는다.
+       start 로 올리고, sticky 계좌 필터에 가리지 않게 여백은 CSS scroll-margin-top 이 맡는다 */
+    if(row) row.scrollIntoView({ block: "start", behavior: "smooth" });
   });
 }
 
@@ -2362,8 +2375,9 @@ function donutSvg(parts, total, cap, aria, opts = {}){
     `<b>${compact(p.v)}</b> <i>${(p.v / total * 100).toFixed(1)}%</i></span>`).join("");
   const sideBox = side
     ? `<div class="donut-side"><span class="ds-h"${data(side)}><i class="dot ${side.cls}"></i>` +
-      `<em>${esc(side.name)}</em></span><b${data(side)}>${compact(side.v)}</b>` +
-      `<i>${(side.v / total * 100).toFixed(1)}%</i>` +
+      `<em>${esc(side.name)}</em></span>` +
+      `<span class="ds-r ds-all"${data(side)}><em>전체</em><b>${compact(side.v)}</b>` +
+      `<i>(${(side.v / total * 100).toFixed(1)}%)</i></span>` +
       `${opts.sideRows || ""}</div>`
     : "";
   return `<div class="donut${side ? " donut-wide" : ""}" data-total="${compact(total)}" data-cap="${esc(cap)}">
@@ -2625,13 +2639,15 @@ function renderRecords(){
 
   if(state.recView === "agg"){
     const aggs = aggregate(rows);
+    /* 값을 오른쪽에 세로로 쌓지 않는다 — 대부분 항목이 둘뿐이라 자리가 비어 보이고,
+       셋이 되는 항목만 유독 길어졌다. 맥락은 왼쪽에 모으고 금액은 맨 아래 한 곳에 둔다.
+       청산 표시는 이름에 이미 (매도 완료)가 붙으므로 뺐다 */
     rList("recList", aggs.map(a => rItem({
       name: esc(dispNameOf(a.name, a.holding ? a.holding.id : null)),
-      val: won(a.netKrw), valCls: "recv",
-      sub: `${ACCOUNTS[a.account]} · ${a.count}회`,
-      subVal: `최근 주당 ${localAmt(a.last.perShare, a.market)}`,
+      sub: `${ACCOUNTS[a.account]} · ${a.count}회 · 최근 주당 ${localAmt(a.last.perShare, a.market)}`,
+      subVal: a.taxKrw ? `원천징수 ${won(a.taxKrw)}원` : "",
       bar: total > 0 ? (a.netKrw / total) * 100 : 0,
-      foot: a.taxKrw ? `원천징수 ${won(a.taxKrw)}원` : (a.holding ? "" : "청산"),
+      foot: won(a.netKrw) + "원", footCls: "recv",
     })), "");
     t.innerHTML = `
       <thead><tr>
@@ -2662,11 +2678,10 @@ function renderRecords(){
     const tx = recTax(r);
     return rItem({
       name: esc(dispNameOf(recName(r), r.holdingId)),
-      val: won(recNetKrw(r)), valCls: "recv",
-      sub: `${r.date} · ${ACCOUNTS[r.account]}`,
-      subVal: `${r.shares}주 · 주당 ${localAmt(r.perShare, r.market)}`,
-      foot: [tx ? `원천징수 ${localAmt(tx, r.market)}` : null, r.memo ? esc(r.memo) : null]
+      sub: `${r.date} · ${ACCOUNTS[r.account]} · ${r.shares}주 · 주당 ${localAmt(r.perShare, r.market)}`,
+      note: [tx ? `원천징수 ${localAmt(tx, r.market)}` : null, r.memo ? esc(r.memo) : null]
         .filter(Boolean).join(" · "),
+      foot: won(recNetKrw(r)) + "원", footCls: "recv",
     });
   }), "", "rec", sl);
   t.innerHTML = `
@@ -2741,13 +2756,13 @@ function bindMore(table){
    표와 같은 데이터를 줄로 쌓아 낸다. 열이 없으니 표에서 숨긴 값도 함께 실린다.
    접기 상태(openRows)와 슬라이스는 표와 공유한다 — 폰과 넓은 화면이 같은 지점에서 접힌다 */
 function rItem(o){
-  const bot = o.bar != null || o.foot;
+  const bot = o.bar != null || o.foot || o.note;
   return `<div class="ritem">
-    <div class="rtop"><span class="nm">${o.name}</span><b class="${o.valCls || ""}">${o.val}</b></div>
+    <div class="rtop"><span class="nm">${o.name}</span><b class="${o.valCls || ""}">${o.val || ""}</b></div>
     <div class="rmid"><span>${o.sub || ""}</span><span class="${o.subValCls || ""}">${o.subVal || ""}</span></div>
     ${bot ? `<div class="rbot">${o.bar != null
       ? `<i class="wbar" style="--p:${o.bar.toFixed(1)}"></i><span class="bp">${o.bar.toFixed(1)}%</span>`
-      : `<span></span>`}<span class="${o.footCls || ""}">${o.foot || ""}</span></div>` : ""}
+      : `<span class="rnote">${o.note || ""}</span>`}<span class="${o.footCls || ""}">${o.foot || ""}</span></div>` : ""}
   </div>`;
 }
 
@@ -2869,9 +2884,9 @@ function renderContrib(){
   const sl = sliceRows("contrib:" + acc, all, 0);
   rList("contribList", sl.list.map(c => rItem({
     name: ACCOUNTS[c.account],
-    val: won(c.amount), valCls: "out",
     sub: c.date,
     subVal: c.memo ? esc(c.memo) : "",
+    foot: won(c.amount) + "원", footCls: "out",
   })), "", "contrib:" + acc, sl);
   const total = all.reduce((a,c) => a + (c.amount || 0), 0);
   const thisYear = all.filter(c => c.date.startsWith(String(y))).reduce((a,c) => a + (c.amount || 0), 0);
@@ -2936,13 +2951,13 @@ function renderTrades(){
     const r = (!direct && t.costBasis) ? pnl / t.costBasis : null;
     return rItem({
       name: esc(dispNameOf(t.name, t.holdingId)) + (direct ? ` <span class="tag">기타수익</span>` : ""),
-      val: `${pnl >= 0 ? "+" : "−"}${won(Math.abs(tradePnlKrw(t)))}`,
-      valCls: pnl >= 0 ? "pos" : "neg",
-      sub: `${t.date} · ${ACCOUNTS[t.account]}`,
+      sub: [`${t.date} · ${ACCOUNTS[t.account]}`,
+            direct ? null : `매도 ${localAmt(tradeProceeds(t), t.market)}`].filter(Boolean).join(" · "),
       subVal: r === null ? "" : `${r >= 0 ? "+" : "−"}${pct(Math.abs(r))}`,
       subValCls: r === null ? "" : r >= 0 ? "pos" : "neg",
-      foot: direct ? (t.memo ? esc(t.memo) : "")
-        : `매도 ${localAmt(tradeProceeds(t), t.market)} · 원금 ${localAmt(t.costBasis, t.market)}`,
+      note: direct ? (t.memo ? esc(t.memo) : "") : `원금 ${localAmt(t.costBasis, t.market)}`,
+      foot: `${pnl >= 0 ? "+" : "−"}${won(Math.abs(tradePnlKrw(t)))}원`,
+      footCls: pnl >= 0 ? "pos" : "neg",
     });
   }), "", "trade", sl);
   el.innerHTML = `
@@ -3046,11 +3061,10 @@ function renderBuys(){
   const sl = sliceRows("buy", rows);
   rList("buyList", sl.list.map(p => rItem({
     name: esc(dispNameOf(p.name, p.holdingId)),
-    val: won(buyCostKrw(p)), valCls: "out",
-    sub: `${p.date} · ${ACCOUNTS[p.account]}`,
-    subVal: `${p.shares}주 · 단가 ${localAmt(p.price, p.market)}`,
-    foot: [p.fee ? `수수료 ${localAmt(p.fee, p.market)}` : null, p.memo ? esc(p.memo) : null]
+    sub: `${p.date} · ${ACCOUNTS[p.account]} · ${p.shares}주 · 단가 ${localAmt(p.price, p.market)}`,
+    note: [p.fee ? `수수료 ${localAmt(p.fee, p.market)}` : null, p.memo ? esc(p.memo) : null]
       .filter(Boolean).join(" · "),
+    foot: won(buyCostKrw(p)) + "원", footCls: "out",
   })), "", "buy", sl);
   el.innerHTML = `
     <thead><tr>
@@ -3597,21 +3611,6 @@ themeBtn.onclick = () => {
 const savedTheme = localStorage.getItem(KEY + ":theme");
 if(savedTheme) document.documentElement.setAttribute("data-theme", savedTheme);
 
-document.getElementById("exportBtn").onclick = () => {
-  const blob = new Blob([JSON.stringify({
-    fx:state.fx, netMode:state.netMode, shortName:state.shortName, blind:state.blind, usdMode:state.usdMode,
-    sort:state.sort, recView:state.recView,
-    tradeView:state.tradeView, panelAcc:state.panelAcc, generated:state.generated || "",
-    holdings:state.holdings, records:state.records,
-    contributions:state.contributions, trades:state.trades, purchases:state.purchases,
-    holidays:state.holidays, brokers:state.brokers, cashActual:state.cashActual
-  }, null, 2)], { type:"application/json" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "dividend-" + iso(TODAY) + ".json";
-  a.click();
-  URL.revokeObjectURL(a.href);
-};
 document.getElementById("firstRunBtn").onclick = () => setTab("more");
 document.getElementById("importBtn").onclick = () => document.getElementById("importFile").click();
 document.getElementById("importFile").onchange = e => {
