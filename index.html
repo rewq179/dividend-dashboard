@@ -17,13 +17,14 @@
    라이트 모드 aqua는 2.74:1로 3:1 미달이라 칩에 글리프+라벨을 반드시 함께 둔다. */
 :root{
   color-scheme:light;
-  /* 바탕은 흰색이고, 구역 구분은 패널 테두리·그림자와 머리 띠(panel2)가 맡는다.
-     띠와 표 머리까지 중립 회색으로 맞춘다 — 한 곳만 베이지면 그 자리만 누렇게 뜬다 */
-  --bg:#ffffff; --panel:#ffffff; --panel2:#f4f5f7;
-  --line:#e1e4e8; --rule:#b6bac1;
-  --tx:#0b0b0b; --tx2:#4b4f55; --tx3:#686d75;
-  --shadow:0 1px 2px rgba(20,24,31,.07), 0 1px 1px rgba(20,24,31,.04);
-  --thead:#f5f6f8; --stripe:#f7f8f9;
+  /* 카드 바깥은 흰 바탕, 카드 안은 아이보리다 — 둘 다 흰색이면 구역 경계가 테두리
+     하나에만 걸린다. 행 줄무늬만 중립 회색으로 둔다: 줄무늬까지 베이지면 표 전체가
+     누렇게 깔려 숫자가 묻힌다 */
+  --bg:#ffffff; --panel:#fdfcf8; --panel2:#f4efe3;
+  --line:#dcd4c2; --rule:#b5aa93;
+  --tx:#0b0b0b; --tx2:#514e46; --tx3:#6d6759;
+  --shadow:0 1px 2px rgba(70,58,34,.07), 0 1px 1px rgba(70,58,34,.04);
+  --thead:#f8f4e8; --stripe:#f2f2f0;
   --accent:#2a78d6; --accent-soft:#e8f0ff;
   --pay:#2a78d6;   --pay-soft:#e8f0ff;
   --ex:#eb6834;    --ex-soft:#fdf1e3;
@@ -387,9 +388,15 @@ td.today .d{font-weight:700; color:var(--tx)}
 .donut-side .ds-r em{font-style:normal; min-width:4.5em}
 .donut-side .ds-r b{color:var(--tx2); font-size:12px; font-weight:600; font-variant-numeric:tabular-nums}
 .donut-side .ds-r i{font-style:normal}
-/* 합계 줄만 한 단계 크게 — 같은 형식이되 어느 것이 전체인지 크기로 갈린다 */
-.donut-side .ds-all{font-size:13px; color:var(--tx2); margin-bottom:2px}
-.donut-side .ds-all b{color:var(--tx); font-size:15px; font-weight:700}
+/* 합계 줄도 계좌 줄과 같은 크기·굵기다. 자리(맨 위)와 이름으로 이미 구분된다 */
+.donut-side .ds-all{margin-bottom:2px}
+
+/* 시장 지수 — 두 칸씩 두 줄. 네 칸을 한 줄에 늘어놓으면 폰에서 값이 잘린다 */
+.idx{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.idx .cell{border:1px solid var(--line); border-radius:10px; padding:9px 11px; background:var(--panel)}
+.idx .nm{font-size:11.5px; color:var(--tx3)}
+.idx .v{font-size:16px; font-weight:700; color:var(--tx); font-variant-numeric:tabular-nums; margin-top:1px}
+.idx .d{font-size:11.5px; font-variant-numeric:tabular-nums}
 
 /* 고른 날로 스크롤할 때 sticky 계좌 필터 아래로 내려앉게 하는 여백 */
 .cal-row{scroll-margin-top:64px}
@@ -481,6 +488,10 @@ table.data th.bar-legend .legend{margin:0}
   min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
 .rtop b{font-size:15px; font-weight:650; white-space:nowrap; font-variant-numeric:tabular-nums}
+.rtop .acc-tag{font-weight:400; font-size:.86em; color:var(--tx3)}
+/* 평가금액·손익 줄. 맥락 줄보다 크고 이름보다 작다 — 종목을 찾은 다음 보는 값이다 */
+.rmid2{font-size:13px; color:var(--tx2)}
+.rmid2 > span:first-child{font-weight:650; color:var(--tx)}
 .rmid, .rbot{
   display:flex; align-items:center; justify-content:space-between; gap:10px;
   margin-top:3px; font-size:11.5px; color:var(--tx3);
@@ -764,6 +775,14 @@ table.data tr.more-row:hover{background:none}
     </div>
 
     <div class="hero" id="hero"></div>
+
+    <div class="panel" id="idxPanel" hidden>
+      <div class="panel-head">
+        <h2>시장 지수</h2>
+        <span class="lim-note" id="idxNote"></span>
+      </div>
+      <div class="idx" id="idxBody"></div>
+    </div>
 
     <div class="panel">
       <div class="panel-head">
@@ -1328,6 +1347,7 @@ let state = {
   shortName: false,
   blind: false,
   usdMode: true,
+  indices: null,
   sort: "annual",
   recView: "agg",
   tradeView: "buy",
@@ -1385,6 +1405,7 @@ function apply(d){
      brokers 는 증권사 연동 결과(라벨·계좌·시각·성공 여부), cashActual 은 예수금 실측이다.
      저장·복원 목록에 넣지 않으면 새로고침 한 번에 사라져 연동 현황을 알 수 없게 된다 */
   state.brokers = (d.brokers && typeof d.brokers === "object") ? d.brokers : {};
+  state.indices = (d.indices && Array.isArray(d.indices.list)) ? d.indices : null;
   state.cashActual = (d.cashActual && typeof d.cashActual === "object") ? d.cashActual : null;
   _holidaySet = null;
   _recIndex = null;
@@ -1431,7 +1452,8 @@ function save(){
     tradeView: state.tradeView, panelAcc: state.panelAcc, generated: state.generated || "",
     holdings: state.holdings, records: state.records,
     contributions: state.contributions, trades: state.trades, purchases: state.purchases,
-    holidays: state.holidays, brokers: state.brokers, cashActual: state.cashActual
+    holidays: state.holidays, brokers: state.brokers, cashActual: state.cashActual,
+    indices: state.indices
   }));
 }
 
@@ -1490,6 +1512,11 @@ function netFactor(h){
    비율·수량·종목명은 남긴다. 그것까지 가리면 무엇을 보여주려던 화면인지가 사라진다.
    막대 길이와 조각 크기는 그대로다 — 계산은 원래 값으로 하고 표기만 가린다 */
 const MASK = "••••";
+
+// 지수·수량처럼 자산 금액이 아닌 수. 소수 둘째 자리까지 두고 가리기 대상이 아니다
+function num(n){
+  return (n || 0).toLocaleString("ko-KR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
 
 function won(n){
   return state.blind ? MASK : Math.round(n).toLocaleString("ko-KR");
@@ -1576,6 +1603,12 @@ function shortOfRecord(r){
   const h = r.holdingId ? state.holdings.find(x => x.id === r.holdingId) : null;
   return h ? shortOf(h) : autoShort(r.name);
 }
+// 리스트 이름 옆의 계좌 꼬리표. 같은 종목이 계좌별로 나뉘어 있어 이름만으로는 구분되지 않는다
+function accTag(account){
+  const label = ACCOUNTS[account];
+  return label ? ` <span class="acc-tag">(${label})</span>` : "";
+}
+
 // 표에 쓰는 이름. 달력은 좁아서 항상 짧은 이름을 쓰지만, 표는 이 토글로 고른다
 function dispName(h){
   return state.shortName ? shortOf(h) : (h.name || "");
@@ -2444,6 +2477,25 @@ function renderDonuts(){
   bindDonut(el);
 }
 
+/* ---------- 홈: 시장 지수 ----------
+   update.py 가 받아 둔 값을 그대로 보여 준다. 앱은 정적 파일이라 스스로 조회할 수 없고,
+   그래서 실시간이 아니다 — 언제 값인지 밝히지 않으면 지금 시세로 읽힌다 */
+function renderIndices(){
+  const panel = document.getElementById("idxPanel");
+  const idx = state.indices;
+  if(!idx || !idx.list.length){ panel.hidden = true; return; }
+  panel.hidden = false;
+  document.getElementById("idxBody").innerHTML = idx.list.map(x => {
+    const up = (x.diff || 0) > 0, flat = !x.diff;
+    const cls = flat ? "" : up ? "pos" : "neg";
+    const sign = flat ? "" : up ? "+" : "−";
+    return `<div class="cell"><div class="nm">${esc(x.name)}</div>` +
+      `<div class="v">${num(x.close)}</div>` +
+      `<div class="d ${cls}">${sign}${num(Math.abs(x.diff || 0))} (${sign}${Math.abs(x.rate || 0).toFixed(2)}%)</div></div>`;
+  }).join("");
+  document.getElementById("idxNote").textContent = idx.asOf ? idx.asOf.slice(5, 16).replace("T", " ") + " 기준" : "";
+}
+
 /* ---------- 홈: 자산 구성 도넛 ----------
    평가금액과 예수금을 한 원에 담는다 — 총자산 중 아직 주식이 안 된 돈이 얼마인지가
    두 그림을 견주지 않고 바로 읽힌다. 13종목을 다 조각내면 얇은 조각이 이름도 못 달고
@@ -2525,15 +2577,16 @@ function renderHoldings(){
     const diff = c > 0 ? v - c : null;
     const diffLocal = c > 0 ? valueLocal(h) - costLocal(h) : 0;
     const usd = state.usdMode && h.market === "US";
+    const diffText = diff === null ? "매입가 미입력"
+      : `${diff >= 0 ? "+" : "−"}${usd ? localAmt(Math.abs(diffLocal), "US") : won(Math.abs(diff))}` +
+        ` (${diff >= 0 ? "+" : "−"}${pct(Math.abs(diff / c))})`;
     return rItem({
-      name: esc(dispName(h)),
-      val: amtOf(h, v, valueLocal(h)),
-      sub: [ACCOUNTS[h.account], `${h.shares}주`,
+      name: esc(dispName(h)) + accTag(h.account),
+      sub: [`${h.shares}주`,
             h.avgPrice ? `평단 ${localAmt(h.avgPrice, h.market)}` : null].filter(Boolean).join(" · "),
-      subVal: diff === null ? "매입가 미입력"
-        : `${diff >= 0 ? "+" : "−"}${usd ? localAmt(Math.abs(diffLocal), "US") : won(Math.abs(diff))}` +
-          ` (${diff >= 0 ? "+" : "−"}${pct(Math.abs(diff / c))})`,
-      subValCls: diff === null ? "" : diff >= 0 ? "pos" : "neg",
+      // 평가금액과 손익은 짝이라 같은 줄에 둔다. 맥락 줄과 막대 사이가 그 자리다
+      mid2: { left: amtOf(h, v, valueLocal(h)), right: diffText,
+              rightCls: diff === null ? "" : diff >= 0 ? "pos" : "neg" },
       bar: totalValue > 0 ? (v / totalValue) * 100 : 0,
       foot: needsInput(h) ? "분배금 미확인" : `연 ${amtOf(h, annualKrw(h), annualLocal(h))}`,
       footCls: needsInput(h) ? "" : "recv",
@@ -2643,8 +2696,8 @@ function renderRecords(){
        셋이 되는 항목만 유독 길어졌다. 맥락은 왼쪽에 모으고 금액은 맨 아래 한 곳에 둔다.
        청산 표시는 이름에 이미 (매도 완료)가 붙으므로 뺐다 */
     rList("recList", aggs.map(a => rItem({
-      name: esc(dispNameOf(a.name, a.holding ? a.holding.id : null)),
-      sub: `${ACCOUNTS[a.account]} · ${a.count}회 · 최근 주당 ${localAmt(a.last.perShare, a.market)}`,
+      name: esc(dispNameOf(a.name, a.holding ? a.holding.id : null)) + accTag(a.account),
+      sub: `${a.count}회 · 최근 주당 ${localAmt(a.last.perShare, a.market)}`,
       subVal: a.taxKrw ? `원천징수 ${won(a.taxKrw)}원` : "",
       bar: total > 0 ? (a.netKrw / total) * 100 : 0,
       foot: won(a.netKrw) + "원", footCls: "recv",
@@ -2677,8 +2730,8 @@ function renderRecords(){
   rList("recList", sl.list.map(r => {
     const tx = recTax(r);
     return rItem({
-      name: esc(dispNameOf(recName(r), r.holdingId)),
-      sub: `${r.date} · ${ACCOUNTS[r.account]} · ${r.shares}주 · 주당 ${localAmt(r.perShare, r.market)}`,
+      name: esc(dispNameOf(recName(r), r.holdingId)) + accTag(r.account),
+      sub: `${r.date} · ${r.shares}주 · 주당 ${localAmt(r.perShare, r.market)}`,
       note: [tx ? `원천징수 ${localAmt(tx, r.market)}` : null, r.memo ? esc(r.memo) : null]
         .filter(Boolean).join(" · "),
       foot: won(recNetKrw(r)) + "원", footCls: "recv",
@@ -2760,6 +2813,8 @@ function rItem(o){
   return `<div class="ritem">
     <div class="rtop"><span class="nm">${o.name}</span><b class="${o.valCls || ""}">${o.val || ""}</b></div>
     <div class="rmid"><span>${o.sub || ""}</span><span class="${o.subValCls || ""}">${o.subVal || ""}</span></div>
+    ${o.mid2 ? `<div class="rmid rmid2"><span class="${o.mid2.leftCls || ""}">${o.mid2.left || ""}</span>` +
+      `<span class="${o.mid2.rightCls || ""}">${o.mid2.right || ""}</span></div>` : ""}
     ${bot ? `<div class="rbot">${o.bar != null
       ? `<i class="wbar" style="--p:${o.bar.toFixed(1)}"></i><span class="bp">${o.bar.toFixed(1)}%</span>`
       : `<span class="rnote">${o.note || ""}</span>`}<span class="${o.footCls || ""}">${o.foot || ""}</span></div>` : ""}
@@ -2949,15 +3004,16 @@ function renderTrades(){
   rList("tradeList", sl.list.map(t => {
     const direct = tradeDirect(t), pnl = tradePnl(t);
     const r = (!direct && t.costBasis) ? pnl / t.costBasis : null;
+    /* 날짜·수량·단가와 금액을 한 줄에 둔다 — 값이 하나뿐인데 줄을 나누면 목록이 두 배로 길어진다 */
     return rItem({
-      name: esc(dispNameOf(t.name, t.holdingId)) + (direct ? ` <span class="tag">기타수익</span>` : ""),
-      sub: [`${t.date} · ${ACCOUNTS[t.account]}`,
-            direct ? null : `매도 ${localAmt(tradeProceeds(t), t.market)}`].filter(Boolean).join(" · "),
-      subVal: r === null ? "" : `${r >= 0 ? "+" : "−"}${pct(Math.abs(r))}`,
-      subValCls: r === null ? "" : r >= 0 ? "pos" : "neg",
-      note: direct ? (t.memo ? esc(t.memo) : "") : `원금 ${localAmt(t.costBasis, t.market)}`,
-      foot: `${pnl >= 0 ? "+" : "−"}${won(Math.abs(tradePnlKrw(t)))}원`,
-      footCls: pnl >= 0 ? "pos" : "neg",
+      name: esc(dispNameOf(t.name, t.holdingId)) + (direct ? ` <span class="tag">기타수익</span>` : "") + accTag(t.account),
+      sub: [t.date,
+            direct ? null : `매도 ${localAmt(tradeProceeds(t), t.market)}`,
+            direct ? null : `원금 ${localAmt(t.costBasis, t.market)}`].filter(Boolean).join(" · "),
+      subVal: `${pnl >= 0 ? "+" : "−"}${won(Math.abs(tradePnlKrw(t)))}원` +
+        (r === null ? "" : ` (${r >= 0 ? "+" : "−"}${pct(Math.abs(r))})`),
+      subValCls: pnl >= 0 ? "pos" : "neg",
+      note: direct && t.memo ? esc(t.memo) : "",
     });
   }), "", "trade", sl);
   el.innerHTML = `
@@ -3060,11 +3116,11 @@ function renderBuys(){
   }
   const sl = sliceRows("buy", rows);
   rList("buyList", sl.list.map(p => rItem({
-    name: esc(dispNameOf(p.name, p.holdingId)),
-    sub: `${p.date} · ${ACCOUNTS[p.account]} · ${p.shares}주 · 단가 ${localAmt(p.price, p.market)}`,
+    name: esc(dispNameOf(p.name, p.holdingId)) + accTag(p.account),
+    sub: `${p.date} · ${p.shares}주 · 단가 ${localAmt(p.price, p.market)}`,
+    subVal: won(buyCostKrw(p)) + "원", subValCls: "out",
     note: [p.fee ? `수수료 ${localAmt(p.fee, p.market)}` : null, p.memo ? esc(p.memo) : null]
       .filter(Boolean).join(" · "),
-    foot: won(buyCostKrw(p)) + "원", footCls: "out",
   })), "", "buy", sl);
   el.innerHTML = `
     <thead><tr>
@@ -3150,7 +3206,7 @@ function renderAll(){
   // 데이터가 아예 없을 때만 안내를 띄운다 — 계좌 필터로 0건이 된 상태와 구분해야 하므로 state 를 직접 본다
   document.getElementById("firstRun").hidden =
     state.holdings.length > 0 || state.records.length > 0 || state.purchases.length > 0;
-  renderTabs(); renderKpis(); renderHomeChart(); renderAssetMix();
+  renderTabs(); renderKpis(); renderHomeChart(); renderIndices(); renderAssetMix();
   renderLimit(); renderCalendar(); renderMonthly();
   renderHoldings(); renderRecords(); renderContrib();
   renderTradeTabs(); renderBuys(); renderTrades();
@@ -3602,10 +3658,12 @@ document.getElementById("calToday").onclick = () => {
 
 const themeBtn = document.getElementById("themeBtn");
 themeBtn.onclick = () => {
-  const cur = document.documentElement.getAttribute("data-theme");
-  const next = cur === "dark" ? "light" : cur === "light" ? "" : "dark";
-  if(next) document.documentElement.setAttribute("data-theme", next);
-  else document.documentElement.removeAttribute("data-theme");
+  /* 밝게·어둡게·시스템 세 상태를 돌리면, 시스템이 지금 밝기와 같을 때 한 번 눌러도
+     화면이 그대로여서 두 번 눌러야 넘어가는 것처럼 보인다. 지금 보이는 색의 반대로만 간다 */
+  const sysDark = matchMedia("(prefers-color-scheme: dark)").matches;
+  const cur = document.documentElement.getAttribute("data-theme") || (sysDark ? "dark" : "light");
+  const next = cur === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next);
   localStorage.setItem(KEY + ":theme", next);
 };
 const savedTheme = localStorage.getItem(KEY + ":theme");
