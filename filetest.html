@@ -1,0 +1,42 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>파일 선택기 진단</title>
+<style>
+ body{font:16px/1.6 system-ui,sans-serif;margin:0;padding:20px;background:#fff;color:#111}
+ h1{font-size:18px;margin:0 0 4px}
+ p.sub{color:#666;font-size:14px;margin:0 0 20px}
+ section{border:1px solid #ddd;border-radius:10px;padding:14px;margin-bottom:14px}
+ b{display:block;margin-bottom:8px}
+ button,input[type=file]{font:inherit}
+ button{padding:10px 16px;border:1px solid #999;border-radius:8px;background:#f6f6f6}
+ #out{white-space:pre-wrap;background:#f2f2f2;border-radius:8px;padding:12px;font-size:13px;min-height:60px}
+</style>
+<h1>파일 선택기 진단</h1>
+<p class="sub">넷을 차례로 눌러 보고, <b style="display:inline">어느 것에서 파일 앱이 뜨는지</b> 알려주세요.</p>
+
+<section><b>1. 보이는 input · accept 없음</b>
+  <input type="file" id="a"></section>
+
+<section><b>2. 숨긴 input + 버튼으로 열기 (지금 앱이 쓰는 방식)</b>
+  <button onclick="document.getElementById('b').click()">파일 고르기</button>
+  <input type="file" id="b" hidden></section>
+
+<section><b>3. accept="application/json"</b>
+  <input type="file" id="c" accept="application/json"></section>
+
+<section><b>4. label 로 감싼 input (JS 없음)</b>
+  <label><input type="file" id="d" style="position:absolute;left:-9999px">
+  <span style="display:inline-block;padding:10px 16px;border:1px solid #999;border-radius:8px;background:#f6f6f6">파일 고르기</span></label></section>
+
+<div id="out">고른 파일이 여기에 표시됩니다.</div>
+<script>
+for(const id of ["a","b","c","d"]){
+  document.getElementById(id).onchange = e => {
+    const f = e.target.files[0];
+    document.getElementById("out").textContent = f
+      ? `${id} → ${f.name}\n${f.size.toLocaleString()} bytes\ntype: ${f.type || "(없음)"}`
+      : `${id} → 선택 취소`;
+  };
+}
+</script>
