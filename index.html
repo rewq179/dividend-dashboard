@@ -341,6 +341,9 @@ td.today .d{font-weight:700; color:var(--tx)}
 .donut .seg.r4{stroke:var(--seq4)} .donut .seg.r5{stroke:var(--seq5)}
 /* 기타는 중립 잉크 단계로 둔다 — 테두리색(--rule)은 두 테마 모두 표면 대비 1.9:1 로 조각이 묻힌다 */
 .donut .seg.rest{stroke:var(--tx3)}
+/* 예수금은 종목이 아니라서 파랑 램프 밖에 둔다 — 이 원에는 계좌 3색이 없어 주황이 비어 있다 */
+.donut .seg.cash{stroke:var(--ex)}
+.dot.cash{background:var(--ex)}
 .dot.r1{background:var(--seq1)} .dot.r2{background:var(--seq2)} .dot.r3{background:var(--seq3)}
 .dot.r4{background:var(--seq4)} .dot.r5{background:var(--seq5)} .dot.rest{background:var(--tx3)}
 /* 짚은 조각만 남기고 눌러 둔다 — 가운데 숫자가 어느 조각의 것인지 색만으로 찾지 않게 한다.
@@ -364,6 +367,20 @@ td.today .d{font-weight:700; color:var(--tx)}
 .donut-keys span{display:flex; align-items:center; gap:6px; white-space:nowrap}
 .donut-keys b{color:var(--tx); font-weight:650; font-variant-numeric:tabular-nums}
 .donut-keys i{color:var(--tx3); font-style:normal; font-variant-numeric:tabular-nums}
+
+/* 자산 구성 — 원 오른쪽에 예수금, 그 아래 전폭으로 종목 목록.
+   종목 이름을 줄임말이 아니라 전체로 쓰므로 범례가 원 옆에 있으면 폭이 모자란다 */
+.donut-wide{display:grid; grid-template-columns:auto 1fr; gap:14px 22px; justify-items:start; justify-content:start}
+.donut-wide > svg{grid-column:1; grid-row:1}
+.donut-wide .donut-side{grid-column:2; grid-row:1; align-self:center; cursor:pointer}
+.donut-wide .donut-keys{grid-column:1 / -1; grid-row:2; width:100%}
+.donut-wide .donut-keys em{max-width:none; flex:1 1 auto}
+.donut-wide .donut-keys span{width:100%}
+.donut-side{display:flex; flex-direction:column; align-items:flex-start; gap:2px; font-size:13px; color:var(--tx2)}
+.donut-side em{font-style:normal}
+.donut-side b{color:var(--tx); font-size:20px; font-weight:700; font-variant-numeric:tabular-nums; line-height:1.2}
+.donut-side i{color:var(--tx3); font-style:normal; font-variant-numeric:tabular-nums}
+.donut.picked .donut-side:not(.on){opacity:.45}
 
 /* ---- 홈 월별 흐름 막대 ----
    막대 자체는 월별 배당 표와 같은 .bar/.seg 관용구를 쓴다. 길이는 --v(막대), --s(조각 비율)로
@@ -623,12 +640,12 @@ table.data tr.more-row:hover{background:none}
      짚는 종목을 왔다갔다하면 그 흔들림이 계속 반복된다. 트랙 폭(124px + 1fr)은 상태와 무관하다 */
   /* 자산 탭의 계좌 도넛 둘도 같은 배치를 쓴다. 가로로 두 개를 나란히 세우면 한 개가 190px 로
      줄어 링 옆에 이름이 들어갈 자리가 없어진다 — 세로로 쌓고 각각을 좌우로 나눈다 */
-  #holdMix .donut, #cashMix .donut, #holdDonuts .donut{
+  #assetMix .donut, #holdDonuts .donut{
     display:grid; grid-template-columns:124px minmax(0, 1fr); gap:12px; align-items:center;
   }
-  #holdMix .donut > svg, #cashMix .donut > svg, #holdDonuts .donut > svg{width:124px; height:124px}
-  #holdMix .donut-keys, #cashMix .donut-keys, #holdDonuts .donut-keys{min-width:0; font-size:12px; gap:5px}
-  #holdMix .donut-keys em{max-width:none}
+  #assetMix .donut > svg, #holdDonuts .donut > svg{width:124px; height:124px}
+  #assetMix .donut-keys, #holdDonuts .donut-keys{min-width:0; font-size:12px; gap:5px}
+  #assetMix .donut-keys em{max-width:none}
   #holdDonuts{gap:14px}
   .hero{padding:16px 15px; gap:20px}
   .hero .facts{gap:20px}
@@ -741,18 +758,10 @@ table.data tr.more-row:hover{background:none}
 
     <div class="panel">
       <div class="panel-head">
-        <h2>보유 비중</h2>
-        <span class="lim-note">상위 5종목 + 기타 · 계좌 탭 반영</span>
+        <h2>자산 구성</h2>
+        <span class="lim-note">상위 5종목 + 기타 + 예수금 · 계좌 탭 반영</span>
       </div>
-      <div id="holdMix"></div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-head">
-        <h2>예수금 구성</h2>
-        <span class="lim-note">계좌별 · 아직 주식이 안 된 돈</span>
-      </div>
-      <div id="cashMix"></div>
+      <div id="assetMix"></div>
     </div>
 
     <div class="kpis" id="kpis"></div>
@@ -2321,7 +2330,7 @@ const SORTS = {
 /* ---------- 도넛 ----------
    parts 는 { cls, name, v } 다. 색은 cls 가 정하고 이름은 조각과 범례가 함께 쓴다 —
    계좌 구성(계좌 3색)과 보유 비중(파랑 진하기)이 같은 그림을 두 번 만들지 않게 이 한 곳을 쓴다 */
-function donutSvg(parts, total, cap, aria){
+function donutSvg(parts, total, cap, aria, opts){
   const R = 40, C = 2 * Math.PI * R, GAP = 2;
   let acc = 0;
   /* 조각을 짚으면 가운데 숫자가 그 조각의 비율과 금액으로 바뀐다 (bindDonut).
@@ -2339,15 +2348,23 @@ function donutSvg(parts, total, cap, aria){
     acc += len;
     return s;
   }).join("");
-  const keys = parts.map(p =>
+  /* side 로 지정한 조각은 범례에서 빼 원 오른쪽에 크게 세운다 — 종목 목록과 성격이
+     다른 한 조각(예수금)을 같은 줄에 늘어놓으면 종목 하나처럼 읽힌다 */
+  const side = opts && opts.side ? parts.find(p => p.cls === opts.side) : null;
+  const keys = parts.filter(p => p !== side).map(p =>
     `<span title="${esc(p.name)}"${data(p)}><i class="dot ${p.cls}"></i><em>${esc(p.name)}</em>` +
     `<b>${compact(p.v)}</b> <i>${(p.v / total * 100).toFixed(1)}%</i></span>`).join("");
-  return `<div class="donut" data-total="${compact(total)}" data-cap="${esc(cap)}">
+  const sideBox = side
+    ? `<div class="donut-side"${data(side)}><i class="dot ${side.cls}"></i>` +
+      `<em>${esc(side.name)}</em><b>${compact(side.v)}</b>` +
+      `<i>${(side.v / total * 100).toFixed(1)}%</i></div>`
+    : "";
+  return `<div class="donut${side ? " donut-wide" : ""}" data-total="${compact(total)}" data-cap="${esc(cap)}">
     <svg viewBox="0 0 100 100" width="160" height="160" role="img" aria-label="${esc(aria || cap)}">
       <g transform="rotate(-90 50 50)">${segs}</g>
       <text class="hole" x="50" y="49" text-anchor="middle">${compact(total)}</text>
       <text class="hole-cap" x="50" y="62" text-anchor="middle">${cap}</text>
-    </svg>
+    </svg>${sideBox}
     <div class="donut-keys">${keys}</div>
   </div>`;
 }
@@ -2406,18 +2423,28 @@ function renderDonuts(){
   bindDonut(el);
 }
 
-/* ---------- 홈: 보유 비중 도넛 ----------
-   13종목을 다 조각내면 얇은 조각이 이름도 못 달고 늘어선다 — 상위 5개만 세우고 나머지는 '기타'로 묶는다.
-   색은 종목마다 다른 색이 아니라 파랑 한 색의 진하기 단계다. 조각 순서가 곧 크기 순서라 순차 색이 맞고,
-   계좌 3색(검증된 categorical 슬롯)의 의미를 종목 색이 갉아먹지 않는다 */
+/* ---------- 홈: 자산 구성 도넛 ----------
+   평가금액과 예수금을 한 원에 담는다 — 총자산 중 아직 주식이 안 된 돈이 얼마인지가
+   두 그림을 견주지 않고 바로 읽힌다. 13종목을 다 조각내면 얇은 조각이 이름도 못 달고
+   늘어서므로 상위 5개만 세우고 나머지는 '기타'로 묶는다.
+   종목 색은 파랑 한 색의 진하기 단계다(순차) — 조각 순서가 곧 크기 순서이기 때문이고,
+   예수금만 주황으로 떼어 성격이 다른 조각임을 색으로도 알린다 */
 const DONUT_TOP = 5;
 
 function holdingParts(getter){
   const rows = filtered().filter(h => getter(h) > 0)
     .map(h => ({ h, v: getter(h) }))
     .sort((a, b) => b.v - a.v);
-  const parts = rows.slice(0, DONUT_TOP)
-    .map((r, i) => ({ cls: "r" + (i + 1), name: noBrand(shortOf(r.h)), v: r.v }));
+  const top = rows.slice(0, DONUT_TOP);
+  // 같은 ETF를 두 계좌에 나눠 담으면 이름이 겹쳐 어느 조각인지 알 수 없다.
+  // 겹칠 때만 계좌를 덧붙인다 — 늘 붙이면 이름이 길어지기만 한다
+  const dup = {};
+  for(const r of top) dup[r.h.name] = (dup[r.h.name] || 0) + 1;
+  const parts = top.map((r, i) => ({
+    cls: "r" + (i + 1),
+    name: (r.h.name || shortOf(r.h)) + (dup[r.h.name] > 1 ? ` (${ACCOUNTS[r.h.account] || ""})` : ""),
+    v: r.v,
+  }));
   const rest = rows.slice(DONUT_TOP);
   if(rest.length){
     parts.push({ cls: "rest", name: `기타 ${rest.length}종목`, v: rest.reduce((s, r) => s + r.v, 0) });
@@ -2425,41 +2452,35 @@ function holdingParts(getter){
   return parts;
 }
 
-function renderHoldMix(){
-  const el = document.getElementById("holdMix");
+function renderAssetMix(){
+  const el = document.getElementById("assetMix");
   const parts = holdingParts(valueKrw);
-  const total = parts.reduce((s, p) => s + p.v, 0);
-  el.innerHTML = total > 0
-    ? donutSvg(parts, total, "평가금액", "보유 종목 비중")
-    : `<div class="empty">보유 종목이 없습니다.</div>`;
-  bindDonut(el);
-}
-
-/* ---------- 홈: 예수금 구성 도넛 ----------
-   계좌 3색을 그대로 쓴다 — 같은 계좌를 월별 막대·계좌 도넛과 같은 색으로 찾게 한다.
-   음수 계좌는 조각으로 그릴 수 없다. 계좌 밖에서 들어온 돈이 기록되지 않았다는 신호이므로
-   빼고 그리되 몇 개를 뺐는지는 밝힌다 */
-function renderCashMix(){
-  const el = document.getElementById("cashMix");
   const f = fundingOf();
-  if(!f.known){
-    el.innerHTML = `<div class="empty">납입·매수 기록이 없어 예수금을 알 수 없습니다.</div>`;
+  // 음수 계좌는 조각으로 그릴 수 없다. 계좌 밖에서 들어온 돈이 기록되지 않았다는 신호이므로
+  // 빼고 그리되 몇 개를 뺐는지는 밝힌다
+  const list = f.known
+    ? ACC_ORDER.filter(a => f.accounts.includes(a)).map(a => ({ a, v: cashOf(a).cash }))
+    : [];
+  const negs = list.filter(x => x.v < 0);
+  const cash = list.filter(x => x.v > 0).reduce((s, x) => s + x.v, 0);
+  if(cash > 0) parts.push({ cls: "cash", name: "예수금", v: cash });
+
+  const total = parts.reduce((s, p) => s + p.v, 0);
+  if(total <= 0){
+    el.innerHTML = `<div class="empty">보유 종목도 예수금도 없습니다.</div>`;
     return;
   }
-  const list = ACC_ORDER.filter(a => f.accounts.includes(a)).map(a => ({ a, v: cashOf(a).cash }));
-  const parts = list.filter(x => x.v > 0).map(x => ({ cls: x.a, name: ACCOUNTS[x.a], v: x.v }));
-  const total = parts.reduce((s, p) => s + p.v, 0);
-  const negs = list.filter(x => x.v < 0);
-  // 자산 = 평가금액 + 예수금. 예수금만으로는 이 돈이 큰지 작은지 알 수 없다
-  const asset = filtered().reduce((s, h) => s + valueKrw(h), 0) + f.cash;
+  // 계좌별 분해는 각주로 내린다 — 조각으로 쪼개면 종목 색과 계좌 색이 한 원에서 뒤섞인다
+  const byAcc = list.filter(x => x.v > 0)
+    .map(x => `${ACCOUNTS[x.a]} ${won(x.v)}원`).join(" · ");
+  const note = [
+    cash > 0 && byAcc ? `예수금 ${byAcc}` : "",
+    !f.known ? "납입·매수 기록이 없어 예수금을 알 수 없습니다" : "",
+    negs.length ? `${negs.map(x => `${ACCOUNTS[x.a]} ${won(x.v)}원`).join(" · ")}은 음수라 제외 (계좌 밖에서 들어온 돈이 기록되지 않은 것)` : "",
+  ].filter(Boolean).join(" · ");
 
-  el.innerHTML = (total > 0
-      ? donutSvg(parts, total, "예수금", "계좌별 예수금 구성")
-      : `<div class="empty">양수 예수금이 있는 계좌가 없습니다.</div>`)
-    + `<div class="note">${asset > 0 ? `자산 대비 <b>${pct(f.cash / asset)}</b>` : ""}${
-      negs.length
-        ? `${asset > 0 ? " · " : ""}${negs.map(x => `${ACCOUNTS[x.a]} ${won(x.v)}원`).join(" · ")}은 음수라 제외 (계좌 밖에서 들어온 돈이 기록되지 않은 것)`
-        : ""}</div>`;
+  el.innerHTML = donutSvg(parts, total, "자산", "자산 구성", { side: "cash" })
+    + (note ? `<div class="note">${note}</div>` : "");
   bindDonut(el);
 }
 
@@ -3106,7 +3127,7 @@ function renderAll(){
   // 데이터가 아예 없을 때만 안내를 띄운다 — 계좌 필터로 0건이 된 상태와 구분해야 하므로 state 를 직접 본다
   document.getElementById("firstRun").hidden =
     state.holdings.length > 0 || state.records.length > 0 || state.purchases.length > 0;
-  renderTabs(); renderKpis(); renderHomeChart(); renderHoldMix(); renderCashMix();
+  renderTabs(); renderKpis(); renderHomeChart(); renderAssetMix();
   renderLimit(); renderCalendar(); renderMonthly();
   renderHoldings(); renderRecords(); renderContrib();
   renderTradeTabs(); renderBuys(); renderTrades();
