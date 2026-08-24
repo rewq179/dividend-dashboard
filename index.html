@@ -5,6 +5,12 @@
 <!-- viewport-fit=cover 없이는 env(safe-area-inset-*) 이 항상 0을 돌려준다 — 하단 고정 탭바가 홈 인디케이터에 깔린다 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>내 배당 대시보드</title>
+<!-- 홈 화면에서 열면 브라우저 주소창·툴바 없이 뜬다. 로컬 file:// 로 열 때는 404 가 나지만 화면에 영향이 없다 -->
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="icon-192.png">
 <style>
 /* 데이터 색은 dataviz 검증기(validate_palette) 통과값이다.
    categorical slot 1·2·3 (blue/orange/aqua) — all-pairs CVD ΔE 9.2 light / 9.4 dark.
