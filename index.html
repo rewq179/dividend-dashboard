@@ -30,6 +30,8 @@
   --ex:#eb6834;    --ex-soft:#fdf1e3;
   --got:#1baf7a;   --got-soft:#e6f5ee;
   --warn:#fab219;  --warn-soft:#fbf0cf;
+  /* 예수금 전용. 계좌 3색에도 종목 램프에도 없는 색이어야 한 원에서 성격이 갈린다 */
+  --cash:#7c5cd6;
   --up:#c0392f; --down:#1c5cab; --recv:#006300; --track:#cde2fb;
   /* 순차 램프 — 보유 비중 도넛이 쓴다. 큰 조각이 진하고, 가장 옅은 단계도 밝은 표면에서
      조각으로 알아볼 수 있는 선까지만 내려간다 */
@@ -52,6 +54,7 @@
   --ex:#d95926;    --ex-soft:#3a2f21;
   --got:#199e70;   --got-soft:#1e3a2c;
   --warn:#fab219;  --warn-soft:#3a3323;
+  --cash:#a48ae8;
   --up:#f0645f; --down:#6f9dff; --recv:#0ca30c; --track:#184f95;
   /* 어두운 표면에서는 방향이 뒤집힌다 — 큰 조각이 밝다 */
   --seq1:#cfe0f8; --seq2:#9dc2f0; --seq3:#6b9fe6; --seq4:#3987e5; --seq5:#28619f;
@@ -68,6 +71,7 @@
     --ex:#d95926;    --ex-soft:#3a2f21;
     --got:#199e70;   --got-soft:#1e3a2c;
     --warn:#fab219;  --warn-soft:#3a3323;
+    --cash:#a48ae8;
     --up:#f0645f; --down:#6f9dff; --recv:#0ca30c; --track:#184f95;
   /* 어두운 표면에서는 방향이 뒤집힌다 — 큰 조각이 밝다 */
   --seq1:#cfe0f8; --seq2:#9dc2f0; --seq3:#6b9fe6; --seq4:#3987e5; --seq5:#28619f;
@@ -138,10 +142,17 @@ h2{font-size:15px; margin:0 0 12px; color:var(--tx); font-weight:650; letter-spa
 .sel:hover{border-color:var(--accent)}
 
 .setting{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--tx2); flex:none; white-space:nowrap}
-.setting input[type=number]{
-  width:88px; background:var(--panel); color:var(--tx); border:1px solid var(--line);
-  border-radius:6px; padding:4px 6px; font:inherit; font-size:12px; text-align:right;
+.setting input{
+  background:var(--panel); color:var(--tx); border:1px solid var(--line);
+  border-radius:6px; padding:4px 6px; font:inherit; font-size:12px;
 }
+.setting input[type=number]{width:88px; text-align:right}
+.setting input[type=text], .setting input[type=password]{width:150px}
+/* 연결 설정은 한 번 넣고 다시 열 일이 거의 없다 — 접힌 상태가 기본이고,
+   펼쳤을 때 폰 폭에서 여러 줄로 접혀도 한 덩어리로 읽히게 테두리로 묶는다 */
+.pullcfg{display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;
+  padding:9px 11px; border:1px solid var(--line); border-radius:9px; background:var(--panel2)}
+.pullcfg[hidden]{display:none}
 .fx-note{font-size:11px; color:var(--tx3); cursor:pointer; white-space:nowrap}
 .fx-note:hover{color:var(--accent); text-decoration:underline}
 .fx-note.err{color:var(--ex)}
@@ -197,8 +208,9 @@ body:has(.mask.on) .tabbar{display:none}
 }
 .hero .main{flex:1 1 280px; min-width:0}
 .hero .label{font-size:12.5px; color:var(--tx2); font-weight:600; margin-bottom:5px}
-.hero .val{font-size:clamp(32px,5vw,48px); font-weight:650; letter-spacing:-.03em; line-height:1.05}
-.hero .val .unit{font-size:.4em; font-weight:500; color:var(--tx2); margin-left:3px}
+/* 라벨(12.5px)의 두 배를 넘기지 않는다. 이 숫자가 화면을 압도하면 옆의 확정·월평균이 안 읽힌다 */
+.hero .val{font-size:clamp(26px,3.4vw,32px); font-weight:650; letter-spacing:-.03em; line-height:1.15}
+.hero .val .unit{font-size:.5em; font-weight:500; color:var(--tx2); margin-left:3px}
 .hero .facts{display:flex; gap:30px; flex-wrap:wrap; padding-bottom:6px}
 .hero .fact .k{font-size:11.5px; color:var(--tx3); margin-bottom:3px}
 .hero .fact .v{font-size:17px; font-weight:650; letter-spacing:-.02em}
@@ -217,6 +229,8 @@ body:has(.mask.on) .tabbar{display:none}
 .kpi .sub > span, .mgroup .sub > span{display:flex; align-items:baseline; justify-content:space-between; gap:10px}
 .kpi .sub em, .mgroup .sub em{font-style:normal; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .kpi .sub b, .mgroup .sub b{color:var(--tx2); font-weight:650; white-space:nowrap; font-variant-numeric:tabular-nums}
+/* 누적에 딸린 이번 달 증분 — 누적 금액과 같은 굵기면 둘 중 어느 것이 본값인지 알 수 없다 */
+.kpi .sub .mo{color:var(--tx3); font-weight:400}
 .kpi .sub i.dot, .mgroup .sub i.dot{margin-right:5px}
 .panel{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:18px 18px 16px; margin-bottom:16px; box-shadow:var(--shadow)}
 /* 한글은 글자 사이에서 줄바꿈되므로 flex 아이템의 min-content 너비가 한 글자까지 줄어든다.
@@ -309,11 +323,11 @@ td.today .d{font-weight:700; color:var(--tx)}
 .cal-row.today{background:var(--accent-soft); border-radius:8px; padding:9px 10px; margin:0 -10px; border-bottom-color:transparent}
 /* 격자에서 고른 날 — today 는 배경을 쓰므로 겹치지 않게 테두리로 표시한다 */
 .cal-row.sel{outline:2px solid var(--accent); outline-offset:2px; border-radius:8px; opacity:1}
-.cal-date{flex:none; width:72px; padding-top:1px; font-variant-numeric:tabular-nums; white-space:nowrap}
+.cal-date{flex:none; width:86px; padding-top:1px; font-variant-numeric:tabular-nums; white-space:nowrap}
 .cal-date .dd{font-size:15px; font-weight:650; color:var(--tx); letter-spacing:-.02em}
-.cal-date .dw{font-size:11.5px; color:var(--tx3)}
+.cal-date .dw{font-size:11.5px; color:var(--tx3); margin-left:2px}
+.cal-date .tdy{display:block; font-size:11.5px; color:var(--accent); font-weight:650}
 .cal-date .dw.sun{color:var(--up)} .cal-date .dw.sat{color:var(--down)}
-.cal-row.today .cal-date .dw{color:var(--accent); font-weight:650}
 .cal-items{flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:4px}
 /* 목록에서는 폭이 넉넉하므로 이름과 금액을 한 줄에 둔다 */
 .ev.wide{display:flex; align-items:baseline; gap:10px; padding:4px 8px; margin-bottom:0}
@@ -322,6 +336,12 @@ td.today .d{font-weight:700; color:var(--tx)}
 .legend{display:flex; gap:18px; font-size:12.5px; color:var(--tx2); margin-top:12px; flex-wrap:wrap}
 .legend span{display:flex; align-items:center; gap:6px}
 .legend b{color:var(--tx); font-size:13.5px; font-weight:650}
+/* 위 규칙이 의미색(.recv/.out/.pos/.neg)보다 특이도가 높아, 그냥 두면 요약 줄의 금액만
+   검정으로 묻힌다 — 같은 값이 목록에서는 초록인데 요약에서는 아닌 상태가 된다 */
+.legend b.recv{color:var(--recv)}
+.legend b.out{color:var(--tx2)}
+.legend b.pos{color:var(--up)}
+.legend b.neg{color:var(--down)}
 /* 범례는 칩과 같은 글리프 하나로 맞춘다 — 색 점을 같이 두면 기호가 둘로 보인다 */
 .legend b.gl.ex{color:var(--ex)} .legend b.gl.pay{color:var(--pay)} .legend b.gl.got{color:var(--got)}
 .legend b.gl.buy{color:var(--warn)}
@@ -343,9 +363,10 @@ td.today .d{font-weight:700; color:var(--tx)}
 .donut .seg.r4{stroke:var(--seq4)} .donut .seg.r5{stroke:var(--seq5)}
 /* 기타는 중립 잉크 단계로 둔다 — 테두리색(--rule)은 두 테마 모두 표면 대비 1.9:1 로 조각이 묻힌다 */
 .donut .seg.rest{stroke:var(--tx3)}
-/* 예수금은 종목이 아니라서 파랑 램프 밖에 둔다 — 이 원에는 계좌 3색이 없어 주황이 비어 있다 */
-.donut .seg.cash{stroke:var(--ex)}
-.dot.cash{background:var(--ex)}
+/* 예수금은 종목이 아니라서 파랑 램프 밖에 둔다. 옆칸 계좌 목록이 계좌 3색을 쓰므로
+   주황(연금저축)도 쓸 수 없다 — 어느 축에도 없는 전용 색을 준다 */
+.donut .seg.cash{stroke:var(--cash)}
+.dot.cash{background:var(--cash)}
 .dot.r1{background:var(--seq1)} .dot.r2{background:var(--seq2)} .dot.r3{background:var(--seq3)}
 .dot.r4{background:var(--seq4)} .dot.r5{background:var(--seq5)} .dot.rest{background:var(--tx3)}
 /* 짚은 조각만 남기고 눌러 둔다 — 가운데 숫자가 어느 조각의 것인지 색만으로 찾지 않게 한다.
@@ -378,23 +399,20 @@ td.today .d{font-weight:700; color:var(--tx)}
 .donut-wide .donut-keys{grid-column:1 / -1; grid-row:2; width:100%}
 .donut-wide .donut-keys em{max-width:none; flex:1 1 auto}
 .donut-wide .donut-keys span{width:100%}
-.donut-side{display:flex; flex-direction:column; align-items:flex-start; gap:2px; font-size:13px; color:var(--tx2)}
+.donut-side{display:flex; flex-direction:column; align-items:flex-start; gap:5px; font-size:13px; color:var(--tx2)}
 .donut-side em{font-style:normal}
-.donut-side b{color:var(--tx); font-size:20px; font-weight:700; font-variant-numeric:tabular-nums; line-height:1.2}
-.donut-side i{color:var(--tx3); font-style:normal; font-variant-numeric:tabular-nums}
-.donut-side .ds-h{display:flex; align-items:center; gap:6px; cursor:pointer}
-/* 계좌 줄은 총액보다 한 단계 작게 — 같은 크기면 어느 것이 합계인지 알 수 없다 */
-.donut-side .ds-r{display:flex; align-items:baseline; gap:8px; font-size:12px; color:var(--tx3)}
+/* 머리는 종목 범례 한 줄과 같은 모양이다 — 예수금도 조각 하나이므로 같은 규칙으로 읽힌다 */
+.donut-side .ds-h{display:flex; align-items:center; gap:6px; cursor:pointer; color:var(--tx); font-weight:650}
+/* 계좌 줄은 머리보다 한 단계 작게 — 같은 크기면 어느 것이 상위인지 알 수 없다 */
+.donut-side .ds-r{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--tx3); padding-left:2px}
 .donut-side .ds-r em{font-style:normal; min-width:4.5em}
 .donut-side .ds-r b{color:var(--tx2); font-size:12px; font-weight:600; font-variant-numeric:tabular-nums}
-.donut-side .ds-r i{font-style:normal}
-/* 합계 줄도 계좌 줄과 같은 크기·굵기다. 자리(맨 위)와 이름으로 이미 구분된다 */
-.donut-side .ds-all{margin-bottom:2px}
 
-/* 시장 지수 — 두 칸씩 두 줄. 네 칸을 한 줄에 늘어놓으면 폰에서 값이 잘린다 */
-.idx{display:grid; grid-template-columns:1fr 1fr; gap:10px}
-.idx .cell{border:1px solid var(--line); border-radius:10px; padding:9px 11px; background:var(--panel)}
-.idx .nm{font-size:11.5px; color:var(--tx3)}
+/* 시장 지수 — 두 칸씩 두 줄. 네 칸을 한 줄에 늘어놓으면 폰에서 값이 잘린다.
+   칸마다 테두리를 두르면 패널 카드 안에 카드가 또 생긴다 — 여백만으로 나눈다 */
+.idx{display:grid; grid-template-columns:1fr 1fr; gap:16px 14px}
+/* 지수 이름은 값을 찾아가는 이름표다 — 카드 제목과 같은 굵기·색을 준다 */
+.idx .nm{font-size:12px; color:var(--tx2); font-weight:600}
 .idx .v{font-size:16px; font-weight:700; color:var(--tx); font-variant-numeric:tabular-nums; margin-top:1px}
 .idx .d{font-size:11.5px; font-variant-numeric:tabular-nums}
 
@@ -443,24 +461,9 @@ td.today .d{font-weight:700; color:var(--tx)}
 }
 .flow .col.now .mlab{color:var(--tx); font-weight:650}
 
-/* ---- month bars ---- */
-/* 막대를 아래 표의 thead 첫 행으로 넣어 같은 달이 같은 열에 서게 한다.
-   따로 두면 그래프 12칸과 표 12칸의 시작점·간격이 달라 눈으로 이어 붙일 수 없다.
-   막대는 24px로 캡한다 — 12칸이라 한 칸이 좁다 */
-/* 표의 숫자 열은 우측 정렬이므로 막대도 우측에 붙이고 패딩을 th와 같은 10px로 맞춘다.
-   가운데 정렬하면 막대와 월 라벨의 축이 어긋나 같은 달로 읽히지 않는다 */
-table.data th.bar-cell, table.data th.bar-head{background:none; padding:0 10px 7px; vertical-align:bottom}
-table.data th.bar-cell{height:150px}
-/* 월 열을 고정 폭으로 묶는다 — 값이 있는 달만 넓어지면 막대 간격이 들쭉날쭉해진다.
-   fixed 레이아웃이라 내용이 열을 밀지 못하므로 최소 폭을 걸고 넘치면 가로 스크롤로 넘긴다 */
-#monthTable{table-layout:fixed; min-width:1314px}
-#monthTable col.c-name{width:230px} #monthTable col.c-acc{width:92px}
-#monthTable col.c-mon{width:76px} #monthTable col.c-sum{width:80px}
-#monthTable td.l, #monthTable th.l{overflow:hidden; text-overflow:ellipsis}
-table.data th.bar-legend{background:none; border-bottom:0; text-align:left; padding:0 10px 11px; font-weight:400}
-table.data th.bar-legend .legend{margin:0}
-.bar-col{display:flex; flex-direction:column; justify-content:flex-end; align-items:flex-end; height:100%; gap:5px}
-/* column-reverse 라 계좌를 order 순으로 내보내면 첫 계좌가 바닥에 깔린다 */
+/* ---- 막대 ---- */
+/* 홈의 월별 흐름(.flow)이 쓰는 관용구. 계좌 색을 세로로 쌓아 한 달을 한 칸으로 만든다.
+   column-reverse 라 계좌를 order 순으로 내보내면 첫 계좌가 바닥에 깔린다 */
 .bar{
   display:flex; flex-direction:column-reverse; overflow:hidden;
   border-radius:4px 4px 0 0; min-height:2px; width:100%; max-width:24px;
@@ -470,10 +473,6 @@ table.data th.bar-legend .legend{margin:0}
 .bar .seg.normal{background:var(--pay)}
 .bar .seg.pension{background:var(--ex)}
 .bar .seg.irp{background:var(--got)}
-.bar-col .amt{
-  font-size:10.5px; color:var(--tx2); text-align:right; white-space:nowrap;
-  font-weight:600; font-variant-numeric:tabular-nums;
-}
 
 /* ---- 폰 리스트 행 ----
    폰에서는 표를 접고 이것으로 바꾼다. 열을 줄이는 대신 줄로 쌓아, 표에서 숨겼던 값들이
@@ -489,9 +488,6 @@ table.data th.bar-legend .legend{margin:0}
 }
 .rtop b{font-size:15px; font-weight:650; white-space:nowrap; font-variant-numeric:tabular-nums}
 .rtop .acc-tag{font-weight:400; font-size:.86em; color:var(--tx3)}
-/* 평가금액·손익 줄. 맥락 줄보다 크고 이름보다 작다 — 종목을 찾은 다음 보는 값이다 */
-.rmid2{font-size:13px; color:var(--tx2)}
-.rmid2 > span:first-child{font-weight:650; color:var(--tx)}
 .rmid, .rbot{
   display:flex; align-items:center; justify-content:space-between; gap:10px;
   margin-top:3px; font-size:11.5px; color:var(--tx3);
@@ -508,6 +504,13 @@ table.data th.bar-legend .legend{margin:0}
   width:calc(var(--p) * 1%); background:var(--accent); border-radius:2px;
 }
 .rmore{padding:11px 0 2px; text-align:center}
+/* 기록 추가 버튼 — 폰 폭에서 셋씩 접힌다. 자주 쓰는 것부터 앞에 둔다 */
+.addrow{display:flex; gap:8px; flex-wrap:wrap}
+.addrow .btn{flex:1 1 auto; justify-content:center}
+/* 목록 행을 누르면 그 기록의 모달이 열린다 — 눌리는 줄임을 손끝보다 먼저 알려야 한다 */
+.ritem.tap{cursor:pointer}
+.ritem.tap:hover{background:var(--accent-soft); border-radius:8px;
+  box-shadow:0 0 0 10px var(--accent-soft)}
 
 /* ---- 폰 월별 목록 ---- */
 /* 넓은 화면은 교차표를 쓰므로 목록은 폰에서만 나온다 */
@@ -518,33 +521,6 @@ table.data th.bar-legend .legend{margin:0}
 .mhead{display:flex; align-items:baseline; justify-content:space-between; gap:10px; font-size:13.5px; font-weight:650}
 .mgroup.now .mhead{color:var(--accent)}
 .mhead .est{font-style:normal; font-size:11px; font-weight:400; color:var(--tx3); margin-left:3px}
-
-/* ---- tables ---- */
-.scroll{overflow-x:auto}
-/* 표는 패널 폭까지 빼고 좌우 여백은 양 끝 셀이 갖는다.
-   그래야 패널 제목과 첫 열이 같은 세로선에 선다 (margin은 좌우만 — contrib 표의 inline margin-top 보존) */
-.panel > .scroll{margin-left:-18px; margin-right:-18px}
-.panel > .scroll > table.data th:first-child, .panel > .scroll > table.data td:first-child{padding-left:18px}
-.panel > .scroll > table.data th:last-child, .panel > .scroll > table.data td:last-child{padding-right:18px}
-table.data{width:100%; border-collapse:collapse; font-size:13px; font-variant-numeric:tabular-nums}
-table.data th{
-  text-align:right; font-size:12px; color:var(--tx2); font-weight:600;
-  padding:8px 10px; border-bottom:1px solid var(--rule); white-space:nowrap;
-  background:var(--thead);
-}
-table.data th.l, table.data td.l{text-align:left}
-table.data td{padding:9px 10px; border-bottom:1px solid var(--line); text-align:right; white-space:nowrap; color:var(--tx2)}
-table.data tbody tr:nth-child(even){background:var(--stripe)}
-table.data tbody tr:hover{background:var(--accent-soft)}
-table.data tfoot td{font-weight:650; color:var(--tx); border-bottom:0; border-top:2px solid var(--rule); background:none}
-/* 계좌 소계 — 총합(tfoot)보다 한 단계 약하게 눌러 위계를 만든다 */
-table.data tr.sub td, table.data tbody tr.sub:nth-child(even) td{background:var(--panel2); color:var(--tx); font-weight:650; border-top:1px solid var(--rule)}
-table.data tbody tr.sub:hover td{background:var(--panel2)}
-table.data tr.sub .cnt{font-weight:500; color:var(--tx3); margin-left:7px}
-/* 열 위계 — 핵심 수치는 진하게, 보조 수치는 눌러서, 빈 값은 더 눌러서 */
-table.data td.key{color:var(--tx); font-weight:650}
-table.data td.nil{color:var(--tx3)}
-table.data td.l{color:var(--tx)}
 
 .tag{
   display:inline-block; font-size:11.5px; padding:1px 8px; border-radius:20px;
@@ -564,18 +540,14 @@ table.data td.l{color:var(--tx)}
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
 /* 손익은 한국 관례(상승 적색/하락 청색), 초록은 배당(들어오는 돈)에만 쓴다 */
-/* table.data td 의 기본 색이 우선순위에서 이기므로 셀 선택자를 함께 적는다 */
-.pos, table.data td.pos{color:var(--up); font-weight:650}
-.neg, table.data td.neg{color:var(--down); font-weight:650}
-.recv, table.data td.recv{color:var(--recv); font-weight:650}
-/* 나가는 돈(매수·납입)과 비율. 손익의 청색과 값은 같지만 그쪽은 +/− 부호가 늘 붙어 섞이지 않는다.
-   accent 파랑은 라이트 표면에서 3.94:1 이라 본문 색으로 못 쓴다 */
-.out, table.data td.out, table.data tr.sub td.out{color:var(--down); font-weight:650}
-.rate, table.data td.rate{color:var(--tx); font-weight:650}
+.pos{color:var(--up); font-weight:650}
+.neg{color:var(--down); font-weight:650}
+.recv{color:var(--recv); font-weight:650}
+/* 나가는 돈(매수·납입). 손익 청색을 같이 쓰면 매수금액이 평가손실처럼 읽힌다 —
+   지출은 잘잘못이 없는 사실 기록이라 색을 빼고 굵기만 남긴다. 빨강·파랑은 손익 전용이 된다 */
+.out{color:var(--tx2); font-weight:650}
+.rate{color:var(--tx); font-weight:650}
 .empty{text-align:center; color:var(--tx2); padding:40px 10px; font-size:13px}
-/* 접기 — 기록이 쌓이면 표가 화면을 다 먹으므로 기본은 접어 둔다 */
-table.data tr.more-row td{border-bottom:0; text-align:center; padding:11px 10px 4px}
-table.data tr.more-row:hover{background:none}
 
 /* ---- 납입 한도 미터 ----
    채움은 소진 진행도, 트랙은 같은 파랑 램프의 밝은 단계. 한도를 넘긴 만큼은 경고색으로 */
@@ -592,8 +564,11 @@ table.data tr.more-row:hover{background:none}
 .limit .nums b{color:var(--tx); font-weight:650; font-variant-numeric:tabular-nums}
 /* .recv/.out 은 이 규칙보다 특이도가 낮아 그냥은 묻힌다 */
 .limit .nums b.recv{color:var(--recv)}
-.limit .nums b.out{color:var(--down)}
+.limit .nums b.out{color:var(--tx2)}
 .note{font-size:11.5px; color:var(--tx3); margin-top:12px; line-height:1.5}
+/* 문장이 셋씩 이어 붙으면 어디서 끊어 읽어야 할지 알 수 없다 — 문장마다 줄을 나눈다 */
+.note p{margin:0}
+.note p + p{margin-top:8px}
 
 /* ---- modal ---- */
 .mask{
@@ -607,12 +582,19 @@ table.data tr.more-row:hover{background:none}
 }
 .modal h2{font-size:16px; color:var(--tx); margin-bottom:16px}
 .grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
-.f{display:flex; flex-direction:column; gap:5px; margin-bottom:12px}
+/* 1fr 은 minmax(auto,1fr) 이라 트랙의 최소가 내용 폭이다. select 는 가장 긴 option 만큼
+   넓어지려 하므로, 종목명이 긴 항목 하나가 칸을 통째로 밀어내 모달 밖으로 나갔다.
+   폭은 칸이 정하고 내용은 거기 맞춘다 */
+.grid2 > *{min-width:0}
+.f{display:flex; flex-direction:column; gap:5px; margin-bottom:12px; min-width:0}
 .f label{font-size:11.5px; color:var(--tx3); font-weight:600}
 .f input, .f select{
   background:var(--panel2); color:var(--tx); border:1px solid var(--line);
   border-radius:7px; padding:7px 9px; font:inherit; font-size:13px;
+  width:100%; min-width:0;
 }
+/* 닫힌 select 는 ellipsis 가 듣지 않는 브라우저가 있다 — 잘리더라도 칸을 넘지는 않게 한다 */
+.f select{text-overflow:ellipsis}
 .f input:focus, .f select:focus{border-color:var(--accent); outline:2px solid var(--accent); outline-offset:1px}
 .f .hint{font-size:11.5px; color:var(--tx2); line-height:1.45}
 .months{display:grid; grid-template-columns:repeat(6,1fr); gap:5px}
@@ -627,12 +609,11 @@ table.data tr.more-row:hover{background:none}
 .modal-foot{display:flex; gap:8px; justify-content:flex-end; margin-top:18px}
 .modal-foot .grow{flex:1}
 /* ---- 폰 레이아웃 ----
-   폭에 관계없이 항상 이 레이아웃을 쓴다. 넓은 화면에서는 앱을 가운데 한 컬럼(PHONE_MAX)으로
-   묶어 폰과 같은 화면을 보여 준다 — 표·교차표를 위한 넓은 배치를 따로 두지 않는다.
-   되돌리려면 이 블록을 @media (max-width:640px) 로 다시 감싸고 .wrap 의 max-width 만 되돌리면
-   된다. 표 DOM 은 그대로 있고 CSS 로만 감춰져 있다.
+   폭에 관계없이 항상 이 레이아웃을 쓴다. 넓은 화면에서는 앱을 가운데 한 컬럼(--phone)으로
+   묶어 폰과 같은 화면을 보여 준다. 넓은 화면용 표는 두지 않는다 — 목록(.rlist)이 표가 하던
+   일을 전부 맡고, 표에서 숨기던 열까지 줄로 쌓아 낸다.
 
-   블록을 컴포넌트 정의보다 뒤에 두는 것이 중요하다 — 앞에 두면 .panel·.scroll·.cal-date 처럼
+   블록을 컴포넌트 정의보다 뒤에 두는 것이 중요하다 — 앞에 두면 .panel·.cal-date 처럼
    같은 특이도의 규칙에 져서 조용히 죽는다 (예전 520px 블록이 그 상태였다) */
 @media all{
   .wrap{
@@ -678,9 +659,6 @@ table.data tr.more-row:hover{background:none}
   .hero .facts{gap:20px}
   .panel{padding:14px 13px 12px}
   .panel-head{margin:-14px -13px 12px; padding:9px 13px}
-  .panel > .scroll{margin-left:-13px; margin-right:-13px}
-  .panel > .scroll > table.data th:first-child, .panel > .scroll > table.data td:first-child{padding-left:13px}
-  .panel > .scroll > table.data th:last-child, .panel > .scroll > table.data td:last-child{padding-right:13px}
   .cal-date{width:64px}
   /* 패널별 계좌 필터를 감춘다. 진입 시 panelAcc 를 전역값으로 정규화하므로 감춰도 값이 어긋나지 않는다 */
   .tabs.mini{display:none}
@@ -688,24 +666,7 @@ table.data tr.more-row:hover{background:none}
   .cal-nav{flex-basis:100%; justify-content:space-between}
   /* 제목의 괄호 주석은 h2 의 nowrap 을 물려받아 패널 밖으로 밀려난다 — 줄을 내려 접히게 한다 */
   #barYear, #flowNote{display:block; white-space:normal; font-size:11.5px}
-  /* 표 저순위 열 — 폰에서 뺀다. colspan 은 행 끝으로 클램프되므로 합계·소계 행은 어긋나지 않는다 */
-  table.data .sec{display:none}
-  /* 종목명은 접히게 두고 옆의 티커는 뺀다. keep-all 만으로는 "KODEX 미국나스닥100데일리커버드콜OTM"
-     처럼 공백 없는 긴 토큰이 열의 최소 폭을 200px 로 붙잡아 숫자 열을 스크롤 밖으로 밀어낸다 —
-     anywhere 는 break-word 와 달리 최소 폭 자체를 줄여 열이 실제로 좁아진다.
-     table-layout:fixed 는 쓰지 않는다. colspan 이 있는 소계·합계 행이 보이지 않는 열까지 세어
-     내용이 표의 왼쪽 40% 로 몰린다 */
-  table.data td.l{white-space:normal; overflow-wrap:anywhere}
-  table.data td.l .mkt{display:none}
-  .memo{max-width:10ch}
-  /* 남은 열이 349px 에 들어가려면 글자와 패딩도 함께 줄여야 한다 — 실측으로 잡은 값이다 */
-  table.data{font-size:12px}
-  table.data th, table.data td{padding:8px 7px}
-  /* 연 배당 칸의 괄호 배당률은 폰에서 뺀다 — 보유 현황 요약 줄에 이미 있다 */
-  table.data td .rate{display:none}
-  /* 표를 전부 접고 리스트 행으로 바꾼다. 월별 배당만 월 단위 목록(#monthList)을 쓰고
-     나머지 다섯은 .rlist 를 쓴다 — 어느 쪽도 가로 스크롤이 없다 */
-  .scroll{display:none}
+  /* 월별 배당만 월 단위 목록(#monthList)을 쓰고 나머지 다섯은 .rlist 를 쓴다 */
   .rlist, #monthList{display:block}
   /* 폰 격자 — 칸 너비가 (360−24−26)/7 ≈ 44px 이라 칩의 이름·금액이 들어가지 않는다.
      글리프만 남겨 색과 모양 양쪽으로 구분되게 두고, 칸 전체를 눌러 아래 상세를 연다 */
@@ -765,9 +726,9 @@ table.data tr.more-row:hover{background:none}
     <div class="panel" id="firstRun" hidden>
       <div class="panel-head"><h2>시작하기</h2></div>
       <div class="note" style="margin-top:0">
-        보유·기록 데이터가 없습니다. <b>더보기 → 설정 → JSON 불러오기</b>로
-        <code>my-holdings.json</code>을 넣으면 이 화면이 채워집니다.
-        데이터는 이 브라우저에만 저장되고 어디로도 올라가지 않습니다.
+        <p>보유·기록 데이터가 없습니다. <b>더보기 → 설정 → JSON 불러오기</b>로
+        <code>my-holdings.json</code>을 넣으면 이 화면이 채워집니다.</p>
+        <p>데이터는 이 브라우저에만 저장되고 어디로도 올라가지 않습니다.</p>
       </div>
       <div class="top" style="margin:12px 0 0">
         <button class="btn primary" id="firstRunBtn">설정으로 이동</button>
@@ -838,8 +799,11 @@ table.data tr.more-row:hover{background:none}
     </div>
     <div class="donuts" id="holdDonuts"></div>
     <div id="holdSummary" class="legend" style="margin:0 0 12px"></div>
-    <div class="scroll"><table class="data" id="holdTable"></table></div>
     <div class="rlist" id="holdList"></div>
+    <!-- 종목을 늘리는 자리는 목록 끝이다. 더보기까지 가지 않고 보던 자리에서 잇는다 -->
+    <div class="addrow" style="margin-top:12px">
+      <button class="btn" data-add="hold">종목 추가</button>
+    </div>
   </div>
 
   <div class="panel">
@@ -847,7 +811,6 @@ table.data tr.more-row:hover{background:none}
       <h2>월별 배당 <span id="barYear" class="mono" style="color:var(--tx3);font-weight:400"></span></h2>
       <div class="tabs mini" data-acc-panel="monthly"></div>
     </div>
-    <div class="scroll" id="monthScroll"><table class="data" id="monthTable"></table></div>
     <div id="monthList"></div>
   </div>
   </section>
@@ -862,7 +825,6 @@ table.data tr.more-row:hover{background:none}
       </div>
     </div>
     <div id="recSummary" class="legend" style="margin:0 0 12px"></div>
-    <div class="scroll"><table class="data" id="recTable"></table></div>
     <div class="rlist" id="recList"></div>
   </div>
 
@@ -876,19 +838,31 @@ table.data tr.more-row:hover{background:none}
     </div>
     <div id="buyPane">
       <div id="buySummary" class="legend" style="margin:0 0 12px"></div>
-      <div class="scroll"><table class="data" id="buyTable"></table></div>
       <div class="rlist" id="buyList"></div>
       <div class="note" id="buyNote"></div>
     </div>
     <div id="sellPane">
       <div id="tradeSummary" class="legend" style="margin:0 0 12px"></div>
-      <div class="scroll"><table class="data" id="tradeTable"></table></div>
       <div class="rlist" id="tradeList"></div>
     </div>
   </div>
   </section>
 
   <section class="pane" id="pane-more">
+  <div class="panel">
+    <div class="panel-head">
+      <h2>기록 추가</h2>
+      <span class="lim-note">넣은 기록은 각 탭 목록에서 눌러 고칩니다</span>
+    </div>
+    <div class="addrow">
+      <button class="btn" data-add="buy">매수</button>
+      <button class="btn" data-add="rec">배당 수령</button>
+      <button class="btn" data-add="contrib">납입</button>
+      <button class="btn" data-add="trade">매도</button>
+      <button class="btn" data-add="hold">종목</button>
+    </div>
+  </div>
+
   <div class="panel">
     <div class="panel-head">
       <h2>설정</h2>
@@ -925,7 +899,11 @@ table.data tr.more-row:hover{background:none}
       <button class="btn" id="themeBtn" title="테마 전환">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2m0 2.2V19.8a7.8 7.8 0 0 1 0-15.6"/></svg>테마</button>
     </div>
-    <div class="top" style="margin-bottom:12px">
+    <div class="top" style="margin-bottom:10px">
+      <button class="btn sm" id="pullBtn">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 1 9.8 8h-2.5A7.5 7.5 0 0 0 6.3 7.6H9v2.2H2.6V3.4h2.2v2.8A9.96 9.96 0 0 1 12 2m9.4 8.6v6.4h-2.2v-2.8A9.96 9.96 0 0 1 12 22a10 10 0 0 1-9.8-8h2.5a7.5 7.5 0 0 0 13 2.4H15v-2.2z"/></svg>지금 불러오기</button>
+      <button class="btn sm" id="syncBtn" title="원격에서 새로 조회한 뒤 불러온다">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4V1L8 5l4 4V6a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8"/></svg>지금 갱신</button>
       <button class="btn sm" id="importBtn">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 15h-2V5.8L7.9 8.9 6.5 7.5 12 2l5.5 5.5-1.4 1.4L13 5.8zM4 18h16v2.4H4z"/></svg>JSON 불러오기</button>
       <!-- accept 를 두면 안드로이드가 확장자를 MIME 으로 못 읽어 카메라·사진 앱만 띄운다 -->
@@ -934,11 +912,25 @@ table.data tr.more-row:hover{background:none}
       <button class="btn sm danger" id="resetBtn">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 1.5h4V7H4V4.5h4zM6 8.5h12l-.9 12A1.6 1.6 0 0 1 15.5 22h-7a1.6 1.6 0 0 1-1.6-1.5z"/></svg>전체 초기화</button>
     </div>
+    <div style="margin-bottom:12px">
+      <span id="pullNote" class="fx-note" title="눌러서 연결 설정"></span>
+    </div>
+    <div class="pullcfg" id="pullCfg" hidden>
+      <div class="setting">
+        <span>저장소</span>
+        <input type="text" id="pullRepo" placeholder="사용자/저장소" autocomplete="off">
+      </div>
+      <div class="setting">
+        <span>토큰</span>
+        <input type="password" id="pullToken" placeholder="github_pat_…" autocomplete="off">
+      </div>
+      <button class="btn sm" id="pullSaveBtn">저장</button>
+    </div>
     <div id="dataStatus"></div>
     <div class="note">
-      <b>세후 금액</b> — 배당 금액을 원천징수 뺀 실수령 기준으로 봅니다.
-      세율은 종목 지정값 우선, 없으면 연금저축·IRP 0%(과세이연) / 일반계좌 국내 15.4%·미국 15%.
-      이미 받은 기록은 양쪽 모두 실수령액을 씁니다.
+      <p><b>세후 금액</b> — 배당 금액을 원천징수 뺀 실수령 기준으로 봅니다.</p>
+      <p>세율은 종목 지정값 우선, 없으면 연금저축·IRP 0%(과세이연) / 일반계좌 국내 15.4%·미국 15%.</p>
+      <p>이미 받은 기록은 양쪽 모두 실수령액을 씁니다.</p>
     </div>
   </div>
 
@@ -950,7 +942,6 @@ table.data tr.more-row:hover{background:none}
     </div>
     <div class="limits" id="limits"></div>
     <div class="note" id="limitNote"></div>
-    <div class="scroll" style="margin-top:14px"><table class="data" id="contribTable"></table></div>
     <div class="rlist" id="contribList"></div>
   </div>
 
@@ -960,7 +951,10 @@ table.data tr.more-row:hover{background:none}
       <span class="lim-note">세전 · 전체 계좌 기준 (계좌 탭 무관)</span>
     </div>
     <div id="limitBody"></div>
-    <div class="note">공시된 <b>주당 과세표준액</b>이 있으면 그 금액만, 없으면 세율 0% 종목을 뺀 값입니다. 최근 회차로 연 환산한 추정이니 정확한 금액은 원천징수영수증으로 확인하세요.</div>
+    <div class="note">
+      <p>공시된 <b>주당 과세표준액</b>이 있으면 그 금액만, 없으면 세율 0% 종목을 뺀 값입니다.</p>
+      <p>최근 회차로 연 환산한 추정이니 정확한 금액은 원천징수영수증으로 확인하세요.</p>
+    </div>
   </div>
   </section>
 
@@ -1323,6 +1317,10 @@ table.data tr.more-row:hover{background:none}
 "use strict";
 
 const KEY = "dividend-tracker-v1";
+// 앱에서 기록을 고친 시각. 받아 온 데이터로 갈아탈 때 잃을 것이 있는지 알리는 근거다
+const EDIT_KEY = KEY + ":edited";
+// 저장소·토큰은 자산 데이터가 아니라 이 기기의 연결 설정이다. 내보낸 JSON 에 섞이면 안 된다
+const PULL_KEY = KEY + ":pull";
 const ACCOUNTS = { irp:"IRP", pension:"연금저축", normal:"일반" };
 // 표시 순서는 ACCOUNTS 선언 순(IRP 우선)과 달리 일반 → 연금저축 → IRP로 고정한다
 const ACC_ORDER = ["normal", "pension", "irp"];
@@ -1445,7 +1443,15 @@ function load(){
   if(useSeed) save();
 }
 
-function save(){
+/* touched 는 종목·기록을 사람이 고쳤다는 뜻이다. 받아 온 데이터는 apply 로 통째로
+   갈아타므로, 화면 설정 변경과 구분해 두어야 무엇을 잃는지 알릴 수 있다 */
+function save(touched){
+  // update.py 의 generated 가 로컬 시각이라 toISOString(UTC)을 쓰면 나란히 놓였을 때 어긋난다
+  if(touched){
+    const t = new Date();
+    localStorage.setItem(EDIT_KEY,
+      `${iso(t)}T${String(t.getHours()).padStart(2,"0")}:${String(t.getMinutes()).padStart(2,"0")}`);
+  }
   localStorage.setItem(KEY, JSON.stringify({
     fx: state.fx, netMode: state.netMode, shortName: state.shortName, blind: state.blind, usdMode: state.usdMode,
     sort: state.sort, recView: state.recView,
@@ -1465,6 +1471,10 @@ function mkDate(y, m, d){
 }
 function iso(d){
   return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+// 갱신 시각·연동 시각·불러오기 안내가 같은 표기를 쓰도록 한 곳에 모은다
+function stamp(s){
+  return (s || "").replace("T", " ").slice(0, 16);
 }
 
 /* 영업일 보정 — 배당락은 장이 열려야 발생하므로 휴일이면 직전 영업일로 당기고,
@@ -1647,6 +1657,19 @@ function isMissed(h, pay){
   return pay < TODAY && !recIndex().has(h.id + "|" + iso(pay).slice(0, 7));
 }
 
+/* 매수 기록이 그 종목의 전량을 담고 있으면 첫 기록일이 곧 보유 시작일이다.
+   일부만 적힌 상태에서 이걸 쓰면 실제로 받았던 회차까지 없는 것이 되므로,
+   수량·평단이 기록과 맞아떨어질 때(buysCover)만 판정에 쓴다 */
+function heldSince(h){
+  if(!buysCover(h.id)) return null;
+  let first = null;
+  for(const p of state.purchases){
+    if(p.holdingId !== h.id || !p.date) continue;
+    if(!first || p.date < first) first = p.date;
+  }
+  return first;
+}
+
 // 배당락일에 사면 이미 늦다 — 결제가 T+2라 그 전 영업일까지 체결돼야 기준일에 주주로 잡힌다
 function buyByOf(ex){
   const d = new Date(ex.getTime());
@@ -1665,6 +1688,7 @@ function perShareOf(h, ex){
 
 function paymentsOf(h, years){
   const out = [];
+  const since = heldSince(h);
   for(const y of years){
     for(const m of (h.exMonths || [])){
       // exDay 는 회차별 배당락일의 최빈값이라 위클리 상품은 달마다 하루씩 어긋난다.
@@ -1681,9 +1705,14 @@ function paymentsOf(h, years){
       const pay = (one.fixed && h.divNextPay)
         ? mkDate(+h.divNextPay.slice(0, 4), +h.divNextPay.slice(5, 7), +h.divNextPay.slice(8, 10))
         : nextBiz(mkDate(py, pm, h.payDay || h.exDay));
+      const buy = buyByOf(ex);
+      /* 매수 마감일이 보유 시작보다 앞서면 그 회차는 아예 없던 일이다 — 배당락 때 주주가
+         아니었으므로 받을 자격 자체가 없었다. 남겨 두면 살 수 있었는데 놓친 회차처럼 읽히고,
+         지급일이 매수 뒤로 밀리는 회차(payOffset)는 받지도 못할 금액이 예상에 잡힌다 */
+      if(since && iso(buy) < since) continue;
       const missed = isMissed(h, pay);
       const gross = missed ? 0 : one.amt * (h.shares || 0);
-      out.push({ h, ex, pay, missed, buy: buyByOf(ex), per: one.amt, fixed: one.fixed,
+      out.push({ h, ex, pay, missed, buy, per: one.amt, fixed: one.fixed,
                  local: gross * netFactor(h), krw: toKrw(gross, h.market) * netFactor(h) });
     }
   }
@@ -1823,9 +1852,16 @@ function periodDividend(y, m){
   return { fixed, est, count, total: fixed + est };
 }
 
+/* 손익 표기 — 부호를 앞에 두고 값은 절댓값을 쓴다. 마이너스는 하이픈이 아니라 U+2212 라
+   한 곳에서 만들지 않으면 자리마다 기호가 갈린다. 색은 한국 관례(상승 적색/하락 청색) */
+function signOf(v){ return v >= 0 ? "+" : "−"; }
+function pnlCls(v){ return v >= 0 ? "pos" : "neg"; }
+function signedAmt(v){ return signOf(v) + won(Math.abs(v)); }
+function signedPct(v){ return signOf(v) + pct(Math.abs(v)); }
 function signedWon(v){
-  return `<span class="${v >= 0 ? "pos" : "neg"}">${v >= 0 ? "+" : "−"}${won(Math.abs(v))}</span>`;
+  return `<span class="${pnlCls(v)}">${signedAmt(v)}</span>`;
 }
+
 
 // 값이 없는 줄은 넣지 않는다 — 빈 칸이 남으면 카드마다 줄 수가 달라 보인다
 function subRows(rows){
@@ -1837,16 +1873,10 @@ function renderKpis(){
   const hs = filtered();
   const value = hs.reduce((s,h) => s + valueKrw(h), 0);
   const cost = hs.reduce((s,h) => s + costKrw(h), 0);
-  // 현재 보유 기준 12개월치. 배당률은 '지금 이 포트가 연 몇 %냐'라 확정분이 섞이면 안 된다
-  const forward = hs.reduce((s,h) => s + annualKrw(h), 0);
 
   const y = TODAY.getFullYear(), m = TODAY.getMonth() + 1;
   const yd = periodDividend(y);
   const md = periodDividend(y, m);
-  // 전월비는 확정+예상 총합끼리 본다 — 이번 달 예상이 확정으로 바뀌면 수도 함께 움직인다
-  const pm = m === 1 ? 12 : m - 1;
-  const prev = periodDividend(m === 1 ? y - 1 : y, pm);
-  const mom = md.total - prev.total;
 
   const suffix = state.netMode ? "세후" : "세전";
 
@@ -1877,36 +1907,30 @@ function renderKpis(){
       </div>` : ""}
     </div>`;
 
-  document.getElementById("kpis").innerHTML = `
-    <div class="kpi">
-      <div class="label">${m}월 배당</div>
-      <div class="val mono">${won(md.total)}<span class="unit">원</span></div>
-      ${subRows([
-        [`확정 ${md.count}건`, md.count > 0 ? `<span class="recv">${won(md.fixed)}원</span>` : "없음"],
-        ["남은 예상", `${won(md.est)}원`],
-        [`전월 ${pm}월${prev.total > 0 ? ` ${won(prev.total)}원` : ""}`, prev.total > 0
-          ? `${signedWon(mom)} (${mom >= 0 ? "+" : "−"}${pct(Math.abs(mom / prev.total))})`
-          : "기록 없음"],
-      ])}
-    </div>
-    ${perfCard(overall, valPnl, tradePnlSum, gotAll)}`;
+  document.getElementById("kpis").innerHTML =
+    perfCard(overall, valPnl, tradePnlSum, gotAll, m, md.fixed);
 }
 
 /* 총 수익 = 평가손익 + 실현 매매손익 + 누적 배당. 청산분을 빼면 실제 성과가 아니다.
    비율의 분모(넣은 돈)를 라벨에 붙인다 — 큰 수 옆에 %만 두면 무엇으로 나눈 값인지 알 수 없다.
    보조 줄은 '무엇이 얼마를 벌었나'(배당·매도·평가) 순으로 두고 넣은 돈을 맨 아래에 둔다.
-   같은 형태로 넷을 나열하면 기준값과 구성요소가 구분되지 않는다 */
-function perfCard(overall, valPnl, tradePnl, gotAll){
+   같은 형태로 넷을 나열하면 기준값과 구성요소가 구분되지 않는다.
+
+   이번 달 확정분은 '받은 배당'에 괄호로 붙인다 — 누적의 가장 최근 증분이라 같은 줄에서 읽힌다.
+   따로 있던 'N월 배당' 카드는 걷어냈다. 남은 예상과 전월비는 바로 아래 월별 흐름 막대가
+   12칸으로 이미 보여 주고, 연간 확정·예상은 히어로가 맡는다 */
+function perfCard(overall, valPnl, tradePnl, gotAll, month, monthFixed){
   const f = fundingOf();
   const rate = (f.known && f.invested > 0) ? overall / f.invested : null;
   const invLabel = f.paidOnly ? "넣은 돈 (납입)" : "넣은 돈 (순투입)";
   return `<div class="kpi">
     <div class="label">총 수익${rate !== null
-      ? ` <span style="font-weight:400;color:var(--tx3)">· 넣은 돈 대비 ${rate >= 0 ? "+" : "−"}${pct(Math.abs(rate))}</span>`
+      ? ` <span style="font-weight:400;color:var(--tx3)">· 넣은 돈 대비 ${signedPct(rate)}</span>`
       : ""}</div>
-    <div class="val mono ${overall >= 0 ? "pos" : "neg"}">${overall >= 0 ? "+" : "−"}${won(Math.abs(overall))}<span class="unit">원</span></div>
+    <div class="val mono ${pnlCls(overall)}">${signedAmt(overall)}<span class="unit">원</span></div>
     ${subRows([
-      ["받은 배당", `<span class="recv">+${won(gotAll)}</span>`],
+      ["받은 배당", `<span class="recv">+${won(gotAll)}</span>` +
+        (monthFixed > 0 ? ` <span class="mo">(${month}월 +${won(monthFixed)})</span>` : "")],
       ["팔아서 남긴 것", signedWon(tradePnl)],
       ["아직 안 판 평가손익", signedWon(valPnl)],
       [invLabel, rate === null
@@ -2064,8 +2088,9 @@ function calRow(d, evs){
   const sorted = evs.slice().sort((a, b) => EV_ORDER[a.type] - EV_ORDER[b.type]);
   return `<div class="cal-row ${cls}" data-row="${d}">
     <div class="cal-date">
-      <div class="dd">${calM}/${String(d).padStart(2, "0")}</div>
-      <div class="dw ${wd === 0 ? "sun" : wd === 6 ? "sat" : ""}">${WEEKDAY[wd]}${isToday ? " · 오늘" : ""}</div>
+      <div class="dd">${calM}/${String(d).padStart(2, "0")}<span class="dw ${
+        wd === 0 ? "sun" : wd === 6 ? "sat" : ""}">(${WEEKDAY[wd]})</span></div>
+      ${isToday ? `<span class="tdy">오늘</span>` : ""}
     </div>
     <div class="cal-items">${sorted.map(e => calChip(e, true)).join("")}</div>
   </div>`;
@@ -2262,115 +2287,23 @@ function renderMonthList(perMonth, matrix){
 }
 
 function renderMonthly(){
-  const { y, perMonth, accMonth, matrix } = monthlyTotals("monthly");
-  const t = document.getElementById("monthTable");
+  const { y, perMonth, matrix } = monthlyTotals("monthly");
   renderMonthList(perMonth, matrix);
   if(matrix.length === 0){
     document.getElementById("barYear").textContent = `(${y}년 지급 기준)`;
-    t.innerHTML = `<tbody><tr><td class="empty">표시할 배당 일정이 없습니다.</td></tr></tbody>`;
     return;
   }
-  const cur = TODAY.getMonth();
   const grandTotal = perMonth.reduce((a,b) => a+b, 0);
-  const max = Math.max(...perMonth, 1);
-
-  const bars = perMonth.map((v, i) => {
-    const hgt = v > 0 ? Math.max(3, (v / max) * 100) : 2;
-    const segs = v > 0 ? ACC_ORDER.filter(k => accMonth[k][i] > 0).map(k =>
-      `<div class="seg ${k}" style="height:${(accMonth[k][i] / v) * 100}%" title="${ACCOUNTS[k]} ${won(accMonth[k][i])}원"></div>`).join("") : "";
-    return `<th class="bar-cell" title="${MONTH_LABELS[i]} ${won(v)}원">
-      <div class="bar-col">
-        <div class="amt">${v > 0 ? won(v) : ""}</div>
-        <div class="bar${v > 0 ? "" : " zero"}" style="height:${hgt}%">${segs}</div>
-      </div></th>`;
-  }).join("");
-
-  // 범례는 막대 위 — 색이 무엇을 뜻하는지 먼저 읽고 막대를 본다
-  const legend = ACC_ORDER.filter(k => accMonth[k].some(v => v > 0)).map(k =>
-    `<span><i class="dot ${k}"></i>${ACCOUNTS[k]} <b class="mono">${won(accMonth[k].reduce((a,b) => a+b, 0))}원</b></span>`).join("");
-
-  /* 계좌별로 표를 쪼개면 같은 12개월 머리행을 계좌 수만큼 반복해 읽게 된다.
-     한 표로 두고 계좌 순으로 묶어 정렬만 맞춘다 — 계좌 하나만 볼 때는 패널의 계좌 탭을 쓴다 */
-  const sorted = matrix.slice().sort((a,b) =>
-    ACC_ORDER.indexOf(a.h.account) - ACC_ORDER.indexOf(b.h.account) || b.total - a.total);
-
   document.getElementById("barYear").textContent =
     `(${y}년 지급 기준 · 확정 + 예상 · 월평균 ${won(grandTotal / 12)}원)`;
-
-  t.innerHTML = `
-    <colgroup><col class="c-name"><col class="c-acc">${
-      MONTH_LABELS.map(() => `<col class="c-mon">`).join("")}<col class="c-sum"></colgroup>
-    <thead>
-    <tr><th class="bar-legend" colspan="15"><div class="legend">${legend}</div></th></tr>
-    <tr><th class="bar-head" colspan="2"></th>${bars}<th class="bar-head"></th></tr>
-    <tr>
-      <th class="l">종목</th><th class="l">계좌</th>
-      ${MONTH_LABELS.map((l,i) => `<th${i === cur ? ' style="color:var(--tx)"' : ""}>${l}</th>`).join("")}
-      <th>합계</th>
-    </tr></thead>
-    <tbody>${sorted.map(r => `<tr>
-      <td class="l" title="${esc(r.gone ? r.h.name + " — 청산 종목, 실수령 기록" : (r.h.name || ""))}">${esc(r.gone ? r.h.short : shortOf(r.h))}${
-        r.gone ? `<span class="mkt">청산</span>` : ""}</td>
-      <td class="l"><span class="tag">${ACCOUNTS[r.h.account]}</span></td>
-      ${r.arr.map((v,i) => `<td class="${v ? (i === cur ? "recv" : "") : "nil"}">${v ? won(v) : "-"}</td>`).join("")}
-      <td class="recv">${won(r.total)}</td>
-    </tr>`).join("")}</tbody>
-    <tfoot><tr>
-      <td class="l">합계 ${matrix.length}종목</td>
-      <td></td>
-      ${perMonth.map(v => `<td class="mono">${v ? won(v) : "-"}</td>`).join("")}
-      <td class="mono recv">${won(grandTotal)}</td>
-    </tr></tfoot>`;
 }
-
 /* ---------- render: holdings ---------- */
+// 정렬 기준으로만 쓴다 — 화면에 나오는 배당률은 요약 줄이 따로 만든다
 function divYield(h){
   const v = valueKrw(h);
   return v > 0 ? annualKrw(h) / v : 0;
 }
 
-// 주당 분배금 칸. 아직 안 받은 회차가 공시돼 있으면 그 확정값, 아니면 최근 12개월 평균 추정
-function perShareCell(h){
-  if(needsInput(h) || !h.divPerShare) return `<td class="nil sec">미확인</td>`;
-  const paid = h.divNextPay && h.divNextPay < iso(TODAY);   // 이미 받은 회차는 확정 표시를 거둔다
-  if(h.divNext != null && !paid){
-    const due = h.divNextPay ? ` → ${h.divNextPay} 지급 예정` : "";
-    return `<td class="key sec" title="${h.divNextEx} 배당락 회차 공시값${due}">` +
-      `${localAmt(h.divNext, h.market)}<span class="mkt">확정</span></td>`;
-  }
-  return `<td class="sec" title="최근 12개월 평균 추정 — 다음 회차는 아직 미공시">` +
-    `${localAmt(h.divPerShare, h.market)}<span class="mkt">추정</span></td>`;
-}
-
-/* 손익 한 칸. 금액이 규모를, 괄호의 비율이 체감을 준다 — 열을 나누면 같은 수를 두 번 읽는다.
-   취득원가가 없는 종목(기타수익 등)은 기준가가 없어 칸을 비운다 */
-function pnlCell(h){
-  const c = costKrw(h);
-  if(!(c > 0)) return `<td class="nil sec">-</td>`;
-  const diff = valueKrw(h) - c;
-  const cls = diff >= 0 ? "pos" : "neg", sign = diff >= 0 ? "+" : "−";
-  const amt = (state.usdMode && h.market === "US")
-    ? localAmt(Math.abs(valueLocal(h) - costLocal(h)), "US") : won(Math.abs(diff));
-  return `<td class="sec ${cls}">${sign}${amt} (${sign}${pct(Math.abs(diff / c))})</td>`;
-}
-
-/* 합계 행의 손익. 비율은 종목별 값을 더할 수 없어 원가 있는 종목만 모아 다시 나눈다 */
-function pnlTotalCell(rows){
-  const owned = rows.filter(h => costKrw(h) > 0);
-  const cost = owned.reduce((s,h) => s + costKrw(h), 0);
-  if(!cost) return `<td class="sec"></td>`;
-  const diff = owned.reduce((s,h) => s + valueKrw(h), 0) - cost;
-  const cls = diff >= 0 ? "pos" : "neg", sign = diff >= 0 ? "+" : "−";
-  return `<td class="mono sec ${cls}">${sign}${won(Math.abs(diff))} (${sign}${pct(Math.abs(diff / cost))})</td>`;
-}
-
-// 연 배당 금액과 그 배당률 한 칸. 배당률은 이 금액을 평가액으로 나눈 것뿐이라 열을 나눌 이유가 없다
-function divCell(h){
-  if(needsInput(h)) return `<td><span class="tag w">⚠ 미확인</span></td>`;
-  const v = valueKrw(h), a = annualKrw(h);
-  const amt = (state.usdMode && h.market === "US") ? localAmt(annualLocal(h), "US") : won(a);
-  return `<td class="recv">${amt}${v > 0 ? ` <span class="rate">(${pct(a / v)})</span>` : ""}</td>`;
-}
 const SORTS = {
   annual: { label:"연 배당", cmp:(a,b) => annualKrw(b) - annualKrw(a) },
   value:  { label:"평가액",  cmp:(a,b) => valueKrw(b) - valueKrw(a) },
@@ -2409,8 +2342,6 @@ function donutSvg(parts, total, cap, aria, opts = {}){
   const sideBox = side
     ? `<div class="donut-side"><span class="ds-h"${data(side)}><i class="dot ${side.cls}"></i>` +
       `<em>${esc(side.name)}</em></span>` +
-      `<span class="ds-r ds-all"${data(side)}><em>전체</em><b>${compact(side.v)}</b>` +
-      `<i>(${(side.v / total * 100).toFixed(1)}%)</i></span>` +
       `${opts.sideRows || ""}</div>`
     : "";
   return `<div class="donut${side ? " donut-wide" : ""}" data-total="${compact(total)}" data-cap="${esc(cap)}">
@@ -2486,9 +2417,10 @@ function renderIndices(){
   if(!idx || !idx.list.length){ panel.hidden = true; return; }
   panel.hidden = false;
   document.getElementById("idxBody").innerHTML = idx.list.map(x => {
-    const up = (x.diff || 0) > 0, flat = !x.diff;
-    const cls = flat ? "" : up ? "pos" : "neg";
-    const sign = flat ? "" : up ? "+" : "−";
+    // 보합은 부호도 색도 없다 — 손익과 달리 0 을 '오르지 않음'으로 읽히게 두지 않는다
+    const flat = !x.diff;
+    const cls = flat ? "" : pnlCls(x.diff);
+    const sign = flat ? "" : signOf(x.diff);
     return `<div class="cell"><div class="nm">${esc(x.name)}</div>` +
       `<div class="v">${num(x.close)}</div>` +
       `<div class="d ${cls}">${sign}${num(Math.abs(x.diff || 0))} (${sign}${Math.abs(x.rate || 0).toFixed(2)}%)</div></div>`;
@@ -2509,13 +2441,15 @@ function holdingParts(getter){
     .map(h => ({ h, v: getter(h) }))
     .sort((a, b) => b.v - a.v);
   const top = rows.slice(0, DONUT_TOP);
-  // 같은 ETF를 두 계좌에 나눠 담으면 이름이 겹쳐 어느 조각인지 알 수 없다.
-  // 겹칠 때만 계좌를 덧붙인다 — 늘 붙이면 이름이 길어지기만 한다
+  /* 범례 칸은 좁아 원래 이름이 그대로 들어가지 않는다 — 전략어를 뗀 짧은 이름을 쓴다.
+     같은 ETF를 두 계좌에 나눠 담으면 이름이 겹쳐 어느 조각인지 알 수 없으므로,
+     겹칠 때만 계좌를 덧붙인다 — 늘 붙이면 이름이 길어지기만 한다 */
+  const label = r => shortOf(r.h) || r.h.name;
   const dup = {};
-  for(const r of top) dup[r.h.name] = (dup[r.h.name] || 0) + 1;
+  for(const r of top) dup[label(r)] = (dup[label(r)] || 0) + 1;
   const parts = top.map((r, i) => ({
     cls: "r" + (i + 1),
-    name: (r.h.name || shortOf(r.h)) + (dup[r.h.name] > 1 ? ` (${ACCOUNTS[r.h.account] || ""})` : ""),
+    name: label(r) + (dup[label(r)] > 1 ? ` (${ACCOUNTS[r.h.account] || ""})` : ""),
     v: r.v,
   }));
   const rest = rows.slice(DONUT_TOP);
@@ -2545,8 +2479,10 @@ function renderAssetMix(){
   }
   /* 계좌별은 조각으로 쪼개지 않는다 — 종목 색(파랑 램프)과 계좌 3색이 한 원에서 뒤섞인다.
      대신 예수금 블록 안에 계좌 순서대로 세운다. 보유 목록과 같은 순서라 눈이 따라간다 */
+  // 계좌 점은 자산 탭의 계좌 도넛·월별 막대와 같은 3색이다 — 같은 계좌를 색으로 따라가게 한다
   const sideRows = list.filter(x => x.v > 0).map(x =>
-    `<span class="ds-r"><em>${ACCOUNTS[x.a]}</em><b>${compact(x.v)}</b></span>`).join("");
+    `<span class="ds-r"><i class="dot ${x.a}"></i><em>${ACCOUNTS[x.a]}</em>` +
+    `<b>${compact(x.v)}</b></span>`).join("");
   const note = [
     !f.known ? "납입·매수 기록이 없어 예수금을 알 수 없습니다" : "",
     negs.length ? `${negs.map(x => `${ACCOUNTS[x.a]} ${won(x.v)}원`).join(" · ")}은 음수라 제외 (계좌 밖에서 들어온 돈이 기록되지 않은 것)` : "",
@@ -2561,10 +2497,8 @@ function renderHoldings(){
   renderDonuts();
   const cmp = (SORTS[state.sort] || SORTS.annual).cmp;
   const rows = filtered("holdings").slice().sort(cmp);
-  const t = document.getElementById("holdTable");
   const sm = document.getElementById("holdSummary");
   if(rows.length === 0){
-    t.innerHTML = `<tbody><tr><td class="empty">보유 종목이 없습니다.</td></tr></tbody>`;
     rList("holdList", [], "보유 종목이 없습니다.");
     sm.innerHTML = "";
     return;
@@ -2578,15 +2512,17 @@ function renderHoldings(){
     const diffLocal = c > 0 ? valueLocal(h) - costLocal(h) : 0;
     const usd = state.usdMode && h.market === "US";
     const diffText = diff === null ? "매입가 미입력"
-      : `${diff >= 0 ? "+" : "−"}${usd ? localAmt(Math.abs(diffLocal), "US") : won(Math.abs(diff))}` +
-        ` (${diff >= 0 ? "+" : "−"}${pct(Math.abs(diff / c))})`;
+      : `${signOf(diff)}${usd ? localAmt(Math.abs(diffLocal), "US") : won(Math.abs(diff))}` +
+        ` (${signedPct(diff / c)})`;
     return rItem({
       name: esc(dispName(h)) + accTag(h.account),
+      edit: { kind: "hold", id: h.id },
+      val: amtOf(h, v, valueLocal(h)),
       sub: [`${h.shares}주`,
             h.avgPrice ? `평단 ${localAmt(h.avgPrice, h.market)}` : null].filter(Boolean).join(" · "),
-      // 평가금액과 손익은 짝이라 같은 줄에 둔다. 맥락 줄과 막대 사이가 그 자리다
-      mid2: { left: amtOf(h, v, valueLocal(h)), right: diffText,
-              rightCls: diff === null ? "" : diff >= 0 ? "pos" : "neg" },
+      // 손익은 평가금액에 딸린 값이라 맥락 줄 오른쪽에 둔다 — 주 금액 바로 아래가 그 자리다
+      subVal: diffText,
+      subValCls: diff === null ? "" : pnlCls(diff),
       bar: totalValue > 0 ? (v / totalValue) * 100 : 0,
       foot: needsInput(h) ? "분배금 미확인" : `연 ${amtOf(h, annualKrw(h), annualLocal(h))}`,
       footCls: needsInput(h) ? "" : "recv",
@@ -2597,40 +2533,6 @@ function renderHoldings(){
     <span>월 예상 배당 <b class="mono recv">${won(totalAnnual/12)}원</b></span>
     <span>배당률 <b class="mono rate">${totalValue > 0 ? pct(totalAnnual/totalValue) : "-"}</b></span>
     <span>전체 ${rows.length}종목</span>`;
-
-  t.innerHTML = `
-    <thead><tr>
-      <th class="l">종목</th><th class="l sec">계좌</th>
-      <th title="평가액과 보유 수량">평가액(원)</th><th class="sec">평가손익(원)</th>
-      <th title="연 배당 금액과 평가액 대비 배당률">연 배당(원)</th>
-      <th class="sec" title="다음 회차 공시값(확정) 또는 최근 12개월 평균(추정)">주당 분배금</th><th class="sec">주기</th>
-      <th class="sec">평단가</th><th class="sec">현재가</th><th class="sec"></th>
-    </tr></thead>
-    <tbody>${rows.map(h => {
-      const v = valueKrw(h);
-      return `<tr>
-        <td class="l">${esc(dispName(h))}<span class="mkt">${esc(h.ticker || "코드없음")}${h.market === "US" ? " US" : ""}</span></td>
-        <td class="l sec"><span class="tag">${ACCOUNTS[h.account]}</span></td>
-        <td class="key">${amtOf(h, v, valueLocal(h))}<span class="mkt">${h.shares}주</span></td>
-        ${pnlCell(h)}
-        ${divCell(h)}
-        ${perShareCell(h)}
-        <td class="sec ${h.exMonths && h.exMonths.length ? "" : "nil"}">${freqLabel(h)}</td>
-        <td class="sec ${h.avgPrice ? "" : "nil"}">${h.avgPrice ? localAmt(h.avgPrice, h.market) : "-"}</td>
-        <td class="sec ${h.price ? "" : "nil"}">${h.price ? localAmt(h.price, h.market) : "-"}</td>
-        <td class="sec"><button class="btn sm" data-edit="${h.id}">수정</button></td>
-      </tr>`;
-    }).join("")}</tbody>
-    <tfoot><tr>
-      <td class="l">합계 ${rows.length}종목</td>
-      <td class="sec"></td>
-      <td class="mono">${won(totalValue)}</td>
-      ${pnlTotalCell(rows)}
-      <td class="mono recv">${won(totalAnnual)}${
-        totalValue > 0 ? ` <span class="rate">(${pct(totalAnnual/totalValue)})</span>` : ""}</td>
-      <td class="sec" colspan="5"></td>
-    </tr></tfoot>`;
-  t.querySelectorAll("[data-edit]").forEach(b => b.onclick = () => openModal(b.dataset.edit));
 }
 
 /* ---------- 실현 배당 이력 ---------- */
@@ -2683,45 +2585,21 @@ function renderRecords(){
     <span>원천징수 <b class="mono">${won(tax)}원</b></span>
     <span>전체 ${rows.length}건</span>`;
 
-  const t = document.getElementById("recTable");
   if(rows.length === 0){
-    t.innerHTML = `<tbody><tr><td class="empty">수령 기록이 없습니다.</td></tr></tbody>`;
     rList("recList", [], "수령 기록이 없습니다.");
     return;
   }
 
   if(state.recView === "agg"){
     const aggs = aggregate(rows);
-    /* 값을 오른쪽에 세로로 쌓지 않는다 — 대부분 항목이 둘뿐이라 자리가 비어 보이고,
-       셋이 되는 항목만 유독 길어졌다. 맥락은 왼쪽에 모으고 금액은 맨 아래 한 곳에 둔다.
-       청산 표시는 이름에 이미 (매도 완료)가 붙으므로 뺐다 */
+    // 청산 표시는 이름에 이미 (매도 완료)가 붙으므로 뺐다
     rList("recList", aggs.map(a => rItem({
       name: esc(dispNameOf(a.name, a.holding ? a.holding.id : null)) + accTag(a.account),
+      val: won(a.netKrw) + "원", valCls: "recv",
       sub: `${a.count}회 · 최근 주당 ${localAmt(a.last.perShare, a.market)}`,
-      subVal: a.taxKrw ? `원천징수 ${won(a.taxKrw)}원` : "",
       bar: total > 0 ? (a.netKrw / total) * 100 : 0,
-      foot: won(a.netKrw) + "원", footCls: "recv",
+      foot: a.taxKrw ? `원천징수 ${won(a.taxKrw)}원` : "",
     })), "");
-    t.innerHTML = `
-      <thead><tr>
-        <th class="l">종목</th><th>누적 실수령(원)</th>${taxed ? `<th class="sec">원천징수(원)</th>` : ""}<th>수령</th>
-        <th class="sec">최근 주당</th><th class="l sec">계좌</th><th class="l sec">상태</th>
-      </tr></thead>
-      <tbody>${aggs.map(a => `<tr>
-          <td class="l">${esc(dispNameOf(a.name, a.holding ? a.holding.id : null))}</td>
-          <td class="key recv">${won(a.netKrw)}</td>
-          ${taxed ? `<td class="sec ${a.taxKrw ? "" : "nil"}">${a.taxKrw ? won(a.taxKrw) : "-"}</td>` : ""}
-          <td>${a.count}회</td>
-          <td class="sec">${localAmt(a.last.perShare, a.market)}<span class="mkt">${a.last.date.slice(5)}</span></td>
-          <td class="l sec"><span class="tag">${ACCOUNTS[a.account]}</span></td>
-          <td class="l sec">${a.holding ? '<span class="tag g">보유</span>' : '<span class="tag o">청산</span>'}</td>
-        </tr>`).join("")}</tbody>
-      <tfoot><tr>
-        <td class="l">합계 ${aggs.length}종목</td>
-        <td class="mono recv">${won(total)}</td>
-        ${taxed ? `<td class="mono sec">${won(tax)}</td>` : ""}
-        <td colspan="4"></td>
-      </tr></tfoot>`;
     return;
   }
 
@@ -2731,33 +2609,13 @@ function renderRecords(){
     const tx = recTax(r);
     return rItem({
       name: esc(dispNameOf(recName(r), r.holdingId)) + accTag(r.account),
+      edit: { kind: "rec", id: r.id },
+      val: won(recNetKrw(r)) + "원", valCls: "recv",
       sub: `${r.date} · ${r.shares}주 · 주당 ${localAmt(r.perShare, r.market)}`,
       note: [tx ? `원천징수 ${localAmt(tx, r.market)}` : null, r.memo ? esc(r.memo) : null]
         .filter(Boolean).join(" · "),
-      foot: won(recNetKrw(r)) + "원", footCls: "recv",
     });
   }), "", "rec", sl);
-  t.innerHTML = `
-    <thead><tr>
-      <th class="l">수령일</th><th class="l">종목</th><th>실수령(원)</th>
-      ${taxed ? `<th class="sec">세전</th><th class="sec">원천징수</th>` : ""}<th class="sec">수량</th><th class="sec">주당</th><th class="l sec">계좌</th><th class="sec"></th>
-    </tr></thead>
-    <tbody>${sl.list.map(r => {
-      const g = recGross(r), tx = recTax(r);
-      return `<tr>
-        <td class="l">${r.date}</td>
-        <td class="l">${esc(dispNameOf(recName(r), r.holdingId))}${r.memo ? `<span class="memo" title="${esc(r.memo)}">${esc(r.memo)}</span>` : ""}</td>
-        <td class="key recv">${won(recNetKrw(r))}</td>
-        ${taxed ? `<td class="sec">${localAmt(g, r.market)}</td>
-        <td class="sec ${tx ? "" : "nil"}">${tx ? localAmt(tx, r.market) : "-"}</td>` : ""}
-        <td class="sec">${r.shares}</td>
-        <td class="sec">${localAmt(r.perShare, r.market)}</td>
-        <td class="l sec"><span class="tag">${ACCOUNTS[r.account]}</span></td>
-        <td class="sec"><button class="btn sm" data-recedit="${r.id}">수정</button></td>
-      </tr>`;
-    }).join("")}${moreRow("rec", sl, taxed ? 9 : 7)}</tbody>`;
-  t.querySelectorAll("[data-recedit]").forEach(b => b.onclick = () => openRecModal(b.dataset.recedit));
-  bindMore(t);
 }
 
 /* ---------- 탭 ----------
@@ -2793,11 +2651,6 @@ function sliceRows(key, rows, at = COLLAPSE_AT){
     open,
   };
 }
-function moreRow(key, s, cols){
-  if(!s.hidden && !s.open) return "";
-  return `<tr class="more-row"><td colspan="${cols}">` +
-    `<button class="btn sm" data-more="${key}">${s.hidden ? `더 보기 (${s.hidden}건 숨김)` : "접기"}</button></td></tr>`;
-}
 function bindMore(table){
   table.querySelectorAll("[data-more]").forEach(b => b.onclick = () => {
     openRows[b.dataset.more] = !openRows[b.dataset.more];
@@ -2807,14 +2660,21 @@ function bindMore(table){
 
 /* ---------- 폰 리스트 행 ----------
    표와 같은 데이터를 줄로 쌓아 낸다. 열이 없으니 표에서 숨긴 값도 함께 실린다.
-   접기 상태(openRows)와 슬라이스는 표와 공유한다 — 폰과 넓은 화면이 같은 지점에서 접힌다 */
+   접기 상태(openRows)와 슬라이스는 표와 공유한다 — 폰과 넓은 화면이 같은 지점에서 접힌다.
+
+   슬롯의 뜻은 목록이 달라도 같다. 목록을 옮겨 다녀도 눈이 같은 자리를 보게 하려는 것이다 —
+   전에는 같은 성격의 금액이 목록마다 맨 위·중단 오른쪽·맨 아래로 흩어져 있었다.
+     val        그 줄의 주 금액. 어느 목록이든 이름 오른쪽 맨 위 한 자리다
+     sub/subVal 맥락(날짜·수량·단가)과 거기 딸린 보조 수치
+     bar|note   비중 막대 또는 부가 설명 (막대가 있으면 note 는 자리를 내준다)
+     foot       맨 아랫줄 오른쪽의 부가 금액 */
 function rItem(o){
   const bot = o.bar != null || o.foot || o.note;
-  return `<div class="ritem">
+  // edit 이 있으면 행 전체가 그 기록의 수정 버튼이 된다 (EDITORS 참고)
+  const ed = o.edit ? ` data-ek="${o.edit.kind}" data-ei="${o.edit.id}"` : "";
+  return `<div class="ritem${o.edit ? " tap" : ""}"${ed}>
     <div class="rtop"><span class="nm">${o.name}</span><b class="${o.valCls || ""}">${o.val || ""}</b></div>
     <div class="rmid"><span>${o.sub || ""}</span><span class="${o.subValCls || ""}">${o.subVal || ""}</span></div>
-    ${o.mid2 ? `<div class="rmid rmid2"><span class="${o.mid2.leftCls || ""}">${o.mid2.left || ""}</span>` +
-      `<span class="${o.mid2.rightCls || ""}">${o.mid2.right || ""}</span></div>` : ""}
     ${bot ? `<div class="rbot">${o.bar != null
       ? `<i class="wbar" style="--p:${o.bar.toFixed(1)}"></i><span class="bp">${o.bar.toFixed(1)}%</span>`
       : `<span class="rnote">${o.note || ""}</span>`}<span class="${o.footCls || ""}">${o.foot || ""}</span></div>` : ""}
@@ -2834,7 +2694,16 @@ function rList(id, items, empty, moreKey, sl){
   el.innerHTML = items.length ? items.join("") + more
     : more || `<div class="empty">${empty}</div>`;
   if(moreKey) bindMore(el);
+  el.querySelectorAll("[data-ek]").forEach(r =>
+    r.onclick = () => EDITORS[r.dataset.ek](r.dataset.ei));
 }
+
+/* 기록을 여는 창구는 여기 하나다 — 더보기의 '기록 추가' 버튼은 인자 없이(신규),
+   목록 행은 id 와 함께(수정) 같은 모달을 부른다 */
+const EDITORS = {
+  hold: openModal, rec: openRecModal, contrib: openCModal,
+  trade: openTModal, buy: openBModal,
+};
 
 /* ---------- 연금 납입 한도 ---------- */
 // 연금저축은 600만원까지만 인정되고, 그 인정액과 IRP 납입액의 합이 900만원까지 공제된다.
@@ -2918,20 +2787,18 @@ function renderContrib(){
         `<span>${label} <b>${won(s.counted * rate)}원</b></span>`).join(""));
 
   document.getElementById("limitNote").innerHTML =
-    `<b>1~12월 납입액</b> 기준. 연금저축은 600만원까지 인정되고 IRP와 합쳐 900만원까지 공제됩니다. ` +
-    `IRP는 제도 한도보다 낮은 <b>자체 목표 ${won(LIMIT_IRP_SELF)}원</b>으로 표시합니다. ` +
-    `일반계좌는 한도가 없어 기록만 남습니다.`;
+    `<p><b>1~12월 납입액</b> 기준. 연금저축은 600만원까지 인정되고 IRP와 합쳐 900만원까지 공제됩니다.</p>` +
+    `<p>IRP는 제도 한도보다 낮은 <b>자체 목표 ${won(LIMIT_IRP_SELF)}원</b>으로 표시합니다.</p>` +
+    `<p>일반계좌는 한도가 없어 기록만 남습니다.</p>`;
 
   /* 계좌 필터는 다른 패널과 같은 것을 쓴다. 자기 탭을 따로 두면 상단 필터와 성격이 같은 탭이
      한 화면에 둘이 되고, 폰에서 상단이 고정된 뒤로는 그 중복이 더 도드라진다 */
   const acc = accOf("contrib");
   const all = byAcc(state.contributions, acc).slice().sort((a,b) => b.date.localeCompare(a.date));
-  const t = document.getElementById("contribTable");
   if(all.length === 0){
     const msg = acc === "all"
       ? "납입 기록이 없습니다."
       : `${ACCOUNTS[acc]} 납입 기록이 없습니다.`;
-    t.innerHTML = `<tbody><tr><td class="empty">${msg}</td></tr></tbody>`;
     rList("contribList", [], msg);
     return;
   }
@@ -2939,28 +2806,11 @@ function renderContrib(){
   const sl = sliceRows("contrib:" + acc, all, 0);
   rList("contribList", sl.list.map(c => rItem({
     name: ACCOUNTS[c.account],
+    edit: { kind: "contrib", id: c.id },
+    val: won(c.amount) + "원", valCls: "out",
     sub: c.date,
-    subVal: c.memo ? esc(c.memo) : "",
-    foot: won(c.amount) + "원", footCls: "out",
+    note: c.memo ? esc(c.memo) : "",
   })), "", "contrib:" + acc, sl);
-  const total = all.reduce((a,c) => a + (c.amount || 0), 0);
-  const thisYear = all.filter(c => c.date.startsWith(String(y))).reduce((a,c) => a + (c.amount || 0), 0);
-  t.innerHTML = `
-    <thead><tr><th class="l">납입일</th><th>금액(원)</th><th class="l">계좌</th><th class="l sec">메모</th><th class="sec"></th></tr></thead>
-    <tbody>${sl.list.map(c => `<tr>
-      <td class="l">${c.date}</td>
-      <td class="out">${won(c.amount)}</td>
-      <td class="l"><span class="tag">${ACCOUNTS[c.account]}</span></td>
-      <td class="l sec">${c.memo ? `<span class="memo" title="${esc(c.memo)}">${esc(c.memo)}</span>` : "-"}</td>
-      <td class="sec"><button class="btn sm" data-cedit="${c.id}">수정</button></td>
-    </tr>`).join("")}${moreRow("contrib:" + acc, sl, 5)}</tbody>
-    <tfoot><tr>
-      <td class="l">전체 ${all.length}건</td>
-      <td class="mono out">${won(total)}</td>
-      <td class="l" colspan="3">${y}년 <span class="out">${won(thisYear)}원</span></td>
-    </tr></tfoot>`;
-  t.querySelectorAll("[data-cedit]").forEach(b => b.onclick = () => openCModal(b.dataset.cedit));
-  bindMore(t);
 }
 
 /* ---------- 매매 기록 탭 ---------- */
@@ -2989,14 +2839,12 @@ function filteredTrades(panel){
 
 function renderTrades(){
   const rows = filteredTrades("trade").slice().sort((a,b) => b.date.localeCompare(a.date));
-  const el = document.getElementById("tradeTable");
   const sum = rows.reduce((s,t) => s + tradePnlKrw(t), 0);
   document.getElementById("tradeSummary").innerHTML = rows.length === 0 ? "" : `
-    <span>누적 매매손익 <b class="mono ${sum >= 0 ? "pos" : "neg"}">${sum >= 0 ? "+" : "−"}${won(Math.abs(sum))}원</b></span>
+    <span>누적 매매손익 <b class="mono ${pnlCls(sum)}">${signedAmt(sum)}원</b></span>
     <span>전체 ${rows.length}건</span>`;
 
   if(rows.length === 0){
-    el.innerHTML = `<tbody><tr><td class="empty">매도 기록이 없습니다.</td></tr></tbody>`;
     rList("tradeList", [], "매도 기록이 없습니다.");
     return;
   }
@@ -3004,43 +2852,21 @@ function renderTrades(){
   rList("tradeList", sl.list.map(t => {
     const direct = tradeDirect(t), pnl = tradePnl(t);
     const r = (!direct && t.costBasis) ? pnl / t.costBasis : null;
-    /* 날짜·수량·단가와 금액을 한 줄에 둔다 — 값이 하나뿐인데 줄을 나누면 목록이 두 배로 길어진다 */
+    /* 손익률은 손익 금액에 딸린 값이라 맥락 줄로 내린다 — 둘을 한 자리에 붙이면
+       폰에서 이름이 밀려 잘린다 */
     return rItem({
       name: esc(dispNameOf(t.name, t.holdingId)) + (direct ? ` <span class="tag">기타수익</span>` : "") + accTag(t.account),
+      edit: { kind: "trade", id: t.id },
+      val: `${signedAmt(tradePnlKrw(t))}원`,
+      valCls: pnlCls(pnl),
       sub: [t.date,
             direct ? null : `매도 ${localAmt(tradeProceeds(t), t.market)}`,
             direct ? null : `원금 ${localAmt(t.costBasis, t.market)}`].filter(Boolean).join(" · "),
-      subVal: `${pnl >= 0 ? "+" : "−"}${won(Math.abs(tradePnlKrw(t)))}원` +
-        (r === null ? "" : ` (${r >= 0 ? "+" : "−"}${pct(Math.abs(r))})`),
-      subValCls: pnl >= 0 ? "pos" : "neg",
+      subVal: r === null ? "" : signedPct(r),
+      subValCls: r === null ? "" : pnlCls(r),
       note: direct && t.memo ? esc(t.memo) : "",
     });
   }), "", "trade", sl);
-  el.innerHTML = `
-    <thead><tr>
-      <th class="l">매도일</th><th class="l">종목</th><th>손익(원)</th><th class="sec">수익률</th>
-      <th class="sec">매도금액</th><th class="sec">매입원금</th><th class="sec">수량</th><th class="sec">매도단가</th><th class="l sec">계좌</th><th class="sec"></th>
-    </tr></thead>
-    <tbody>${sl.list.map(t => {
-      const direct = tradeDirect(t);
-      const pv = tradeProceeds(t), pnl = tradePnl(t);
-      const r = (!direct && t.costBasis) ? pnl / t.costBasis : null;
-      const nil = direct ? ' class="sec nil"' : ' class="sec"';
-      return `<tr>
-        <td class="l">${t.date}</td>
-        <td class="l">${esc(dispNameOf(t.name, t.holdingId))}${direct ? ` <span class="tag">기타수익</span>` : ""}${t.memo ? `<span class="memo" title="${esc(t.memo)}">${esc(t.memo)}</span>` : ""}</td>
-        <td class="key ${pnl >= 0 ? "pos" : "neg"}">${pnl >= 0 ? "+" : "−"}${won(Math.abs(tradePnlKrw(t)))}</td>
-        <td class="sec ${r === null ? "nil" : r >= 0 ? "pos" : "neg"}">${r === null ? "-" : (r >= 0 ? "+" : "−") + pct(Math.abs(r))}</td>
-        <td${nil}>${direct ? "-" : localAmt(pv, t.market)}</td>
-        <td${nil}>${direct ? "-" : localAmt(t.costBasis, t.market)}</td>
-        <td${nil}>${direct ? "-" : t.shares}</td>
-        <td${nil}>${direct ? "-" : localAmt(t.sellPrice, t.market)}</td>
-        <td class="l sec"><span class="tag">${ACCOUNTS[t.account]}</span></td>
-        <td class="sec"><button class="btn sm" data-tedit="${t.id}">수정</button></td>
-      </tr>`;
-    }).join("")}${moreRow("trade", sl, 10)}</tbody>`;
-  el.querySelectorAll("[data-tedit]").forEach(b => b.onclick = () => openTModal(b.dataset.tedit));
-  bindMore(el);
 }
 
 /* ---------- 매수 기록 ---------- */
@@ -3098,7 +2924,6 @@ function renderBuys(){
        ${loose.map(h => esc(shortOf(h))).join(" · ")}` : "");
 
   const rows = filteredBuys("trade").slice().sort((a,b) => b.date.localeCompare(a.date));
-  const el = document.getElementById("buyTable");
   const sum = rows.reduce((s,p) => s + buyCostKrw(p), 0);
   const y = String(TODAY.getFullYear());
   const ym = y + "-" + String(TODAY.getMonth() + 1).padStart(2, "0");
@@ -3110,42 +2935,18 @@ function renderBuys(){
     <span>전체 ${rows.length}건</span>`;
 
   if(rows.length === 0){
-    el.innerHTML = `<tbody><tr><td class="empty">매수 기록이 없습니다.</td></tr></tbody>`;
     rList("buyList", [], "매수 기록이 없습니다.");
     return;
   }
   const sl = sliceRows("buy", rows);
   rList("buyList", sl.list.map(p => rItem({
     name: esc(dispNameOf(p.name, p.holdingId)) + accTag(p.account),
+    edit: { kind: "buy", id: p.id },
+    val: won(buyCostKrw(p)) + "원", valCls: "out",
     sub: `${p.date} · ${p.shares}주 · 단가 ${localAmt(p.price, p.market)}`,
-    subVal: won(buyCostKrw(p)) + "원", subValCls: "out",
     note: [p.fee ? `수수료 ${localAmt(p.fee, p.market)}` : null, p.memo ? esc(p.memo) : null]
       .filter(Boolean).join(" · "),
   })), "", "buy", sl);
-  el.innerHTML = `
-    <thead><tr>
-      <th class="l">매수일</th><th class="l">종목</th><th>매수금액(원)</th>
-      <th class="sec">수량</th><th class="sec">매수단가</th><th class="l sec">계좌</th><th class="sec"></th>
-    </tr></thead>
-    <tbody>${sl.list.map((p,i) => {
-      const m = (p.date || "").slice(0, 7);
-      const first = i === 0 || m !== (sl.list[i-1].date || "").slice(0, 7);
-      const t = first ? buyTally(rows, m) : null;
-      return (first ? `<tr class="sub">
-        <td class="l" colspan="2">${m.slice(0,4)}년 ${+m.slice(5,7)}월<span class="cnt">${t.n}건</span></td>
-        <td class="out">${won(t.sum)}</td><td class="sec" colspan="4"></td>
-      </tr>` : "") + `<tr>
-      <td class="l">${p.date}</td>
-      <td class="l">${esc(dispNameOf(p.name, p.holdingId))}${p.memo ? `<span class="memo" title="${esc(p.memo)}">${esc(p.memo)}</span>` : ""}</td>
-      <td class="out" title="${p.fee ? `수수료 ${localAmt(p.fee, p.market)} 포함` : "수수료 없음"}">${won(buyCostKrw(p))}</td>
-      <td class="sec">${p.shares}</td>
-      <td class="sec">${localAmt(p.price, p.market)}</td>
-      <td class="l sec"><span class="tag">${ACCOUNTS[p.account]}</span></td>
-      <td class="sec"><button class="btn sm" data-bedit="${p.id}">수정</button></td>
-    </tr>`;
-    }).join("")}${moreRow("buy", sl, 7)}</tbody>`;
-  el.querySelectorAll("[data-bedit]").forEach(b => b.onclick = () => openBModal(b.dataset.bedit));
-  bindMore(el);
 }
 
 /* generated·brokers·cashActual 은 update.py 가 찍는 값이고 앱 안의 편집으로는 바뀌지 않는다.
@@ -3161,7 +2962,7 @@ function renderGenNote(){
   const when = new Date(g.replace(" ", "T"));
   const days = isNaN(when) ? null : Math.floor((TODAY - new Date(when.getFullYear(), when.getMonth(), when.getDate())) / 86400000);
   const ago = days === null ? "" : days <= 0 ? " · 오늘" : ` · ${days}일 전`;
-  el.textContent = "데이터 갱신 " + g.replace("T", " ").slice(0, 16) + ago;
+  el.textContent = "데이터 갱신 " + stamp(g) + ago;
   el.className = "gen-note" + (days !== null && days > STALE_DAYS ? " stale" : "");
 }
 
@@ -3174,7 +2975,7 @@ function renderDataStatus(){
 
   const brokerRows = bs.map(([, b]) => {
     const accs = (b.accounts || []).map(a => ACCOUNTS[a] || a).join(" · ") || "-";
-    const when = (b.syncedAt || "").replace("T", " ").slice(0, 16);
+    const when = stamp(b.syncedAt);
     return [`${esc(b.label || "?")} <span class="mkt">${accs}</span>`,
       b.ok ? `<span class="recv">연결 ${when}</span>`
            : `<span class="tag w">⚠ 실패</span>`];
@@ -3190,7 +2991,8 @@ function renderDataStatus(){
     : `<div class="kpi" style="box-shadow:none">
         <div class="label">데이터 출처</div>
         ${subRows([...brokerRows, ...cashRows])}
-        ${bs.length === 0 ? `<div class="note">증권사 연동 기록이 없습니다. 앱키(<code>secrets.json</code>)가 있는 PC에서 <code>update.bat</code>을 돌리면 잔고·예수금이 실측으로 채워집니다.</div>` : ""}
+        ${bs.length === 0 ? `<div class="note"><p>증권사 연동 기록이 없습니다.</p>` +
+          `<p>앱키(<code>secrets.json</code>)가 있는 PC에서 <code>update.bat</code>을 돌리면 잔고·예수금이 실측으로 채워집니다.</p></div>` : ""}
       </div>`;
 }
 
@@ -3310,7 +3112,7 @@ document.getElementById("form").onsubmit = e => {
   }else{
     state.holdings.push(data);
   }
-  save(); closeModal(); renderAll();
+  save(true); closeModal(); renderAll();
 };
 
 document.getElementById("delBtn").onclick = () => {
@@ -3318,7 +3120,7 @@ document.getElementById("delBtn").onclick = () => {
   if(!h) return;
   if(!confirm(`'${h.name}' 을 삭제할까요?`)) return;
   state.holdings = state.holdings.filter(x => x.id !== editId);
-  save(); closeModal(); renderAll();
+  save(true); closeModal(); renderAll();
 };
 
 /* ---------- 수령 기록 모달 ---------- */
@@ -3412,7 +3214,7 @@ document.getElementById("recForm").onsubmit = e => {
   }else{
     state.records.push(data);
   }
-  save(); closeRecModal(); renderAll();
+  save(true); closeRecModal(); renderAll();
 };
 
 document.getElementById("recDelBtn").onclick = () => {
@@ -3420,7 +3222,7 @@ document.getElementById("recDelBtn").onclick = () => {
   if(!r) return;
   if(!confirm(`${r.date} '${recName(r)}' 수령 기록을 삭제할까요?`)) return;
   state.records = state.records.filter(x => x.id !== recEditId);
-  save(); closeRecModal(); renderAll();
+  save(true); closeRecModal(); renderAll();
 };
 
 document.getElementById("recCancelBtn").onclick = closeRecModal;
@@ -3461,13 +3263,13 @@ document.getElementById("cForm").onsubmit = e => {
   }else{
     state.contributions.push(data);
   }
-  save(); closeCModal(); renderAll();
+  save(true); closeCModal(); renderAll();
 };
 document.getElementById("cDelBtn").onclick = () => {
   const c = state.contributions.find(x => x.id === cEditId);
   if(!c || !confirm(`${c.date} ${ACCOUNTS[c.account]} ${won(c.amount)}원 기록을 삭제할까요?`)) return;
   state.contributions = state.contributions.filter(x => x.id !== cEditId);
-  save(); closeCModal(); renderAll();
+  save(true); closeCModal(); renderAll();
 };
 document.getElementById("cCancelBtn").onclick = closeCModal;
 document.getElementById("cMask").onclick = e => { if(e.target.id === "cMask") closeCModal(); };
@@ -3534,13 +3336,13 @@ document.getElementById("tForm").onsubmit = e => {
   }else{
     state.trades.push(data);
   }
-  save(); closeTModal(); renderAll();
+  save(true); closeTModal(); renderAll();
 };
 document.getElementById("tDelBtn").onclick = () => {
   const t = state.trades.find(x => x.id === tEditId);
   if(!t || !confirm(`${t.date} '${t.name}' 매도 기록을 삭제할까요?`)) return;
   state.trades = state.trades.filter(x => x.id !== tEditId);
-  save(); closeTModal(); renderAll();
+  save(true); closeTModal(); renderAll();
 };
 document.getElementById("tCancelBtn").onclick = closeTModal;
 document.getElementById("tMask").onclick = e => { if(e.target.id === "tMask") closeTModal(); };
@@ -3603,7 +3405,7 @@ document.getElementById("bForm").onsubmit = e => {
   syncHoldingFromBuys(prevId, coveredPrev);
   if(data.holdingId !== prevId) syncHoldingFromBuys(data.holdingId, coveredNext);
 
-  save(); closeBModal(); renderAll();
+  save(true); closeBModal(); renderAll();
 };
 document.getElementById("bDelBtn").onclick = () => {
   const p = state.purchases.find(x => x.id === bEditId);
@@ -3612,7 +3414,7 @@ document.getElementById("bDelBtn").onclick = () => {
   state.purchases = state.purchases.filter(x => x.id !== bEditId);
   syncHoldingFromBuys(p.holdingId, covered);
 
-  save(); closeBModal(); renderAll();
+  save(true); closeBModal(); renderAll();
 };
 document.getElementById("bCancelBtn").onclick = closeBModal;
 document.getElementById("bMask").onclick = e => { if(e.target.id === "bMask") closeBModal(); };
@@ -3669,7 +3471,29 @@ themeBtn.onclick = () => {
 const savedTheme = localStorage.getItem(KEY + ":theme");
 if(savedTheme) document.documentElement.setAttribute("data-theme", savedTheme);
 
+document.querySelectorAll("[data-add]").forEach(b =>
+  b.onclick = () => EDITORS[b.dataset.add]());
 document.getElementById("firstRunBtn").onclick = () => setTab("more");
+/* ---------- 받아 온 데이터로 갈아타기 ----------
+   파일이든 원격이든 apply 는 상태를 통째로 덮는다. 그래서 규칙을 하나로 둔다 —
+   잃을 것이 있을 때만 묻는다. 들어올 데이터가 더 오래됐거나, 앱에서 고친 기록이 남았을 때다 */
+function adopt(d, where){
+  if(!Array.isArray(d.holdings)) throw new Error("holdings 배열이 없습니다");
+  const inGen = d.generated || "", myGen = state.generated || "";
+  const why = [];
+  if(inGen && myGen && inGen < myGen)
+    why.push(`${where} 데이터가 더 오래됐습니다 — ${stamp(inGen)} < ${stamp(myGen)}`);
+  const edited = localStorage.getItem(EDIT_KEY);
+  if(edited) why.push(`${stamp(edited)} 이후 앱에서 고친 기록이 있습니다`);
+  if(why.length && !confirm(why.join("\n") + "\n\n덮어쓸까요?")) return false;
+
+  apply(d);
+  localStorage.removeItem(EDIT_KEY);
+  save();
+  renderAll();
+  return true;
+}
+
 document.getElementById("importBtn").onclick = () => document.getElementById("importFile").click();
 document.getElementById("importFile").onchange = e => {
   const file = e.target.files[0];
@@ -3677,18 +3501,142 @@ document.getElementById("importFile").onchange = e => {
   const r = new FileReader();
   r.onload = () => {
     try{
-      const d = JSON.parse(r.result);
-      if(!Array.isArray(d.holdings)) throw new Error("holdings 배열이 없습니다");
-      apply(d);
-      save(); renderAll();
+      adopt(JSON.parse(r.result), "파일");
     }catch(err){ alert("불러오기 실패: " + err.message); }
   };
   r.readAsText(file);
   e.target.value = "";
 };
+
+/* ---------- 원격 불러오기 ----------
+   폰은 저장소를 받을 수 없어 지금까지 파일을 손으로 투입해 왔다. GitHub API 는
+   ACAO:* 에 Authorization 을 허용하므로(2026-08-25 preflight 실측) 브라우저에서 바로 받는다.
+   저장소 경로를 코드에 박지 않는 것은 이 파일이 public 저장소로 나가기 때문이다 */
+function pullCfg(){
+  try{ return JSON.parse(localStorage.getItem(PULL_KEY) || "null") || {}; }
+  catch(e){ return {}; }
+}
+
+function setPullNote(text, err){
+  const el = document.getElementById("pullNote");
+  el.className = "fx-note" + (err ? " err" : "");
+  el.textContent = text;
+}
+
+function renderPullCfg(){
+  const cfg = pullCfg();
+  document.getElementById("pullRepo").value = cfg.repo || "";
+  document.getElementById("pullToken").value = cfg.token || "";
+  setPullNote(cfg.repo && cfg.token ? cfg.repo : "연결 설정 필요", !(cfg.repo && cfg.token));
+}
+
+function ghFetch(cfg, path, init){
+  // vnd.github.raw 가 아니면 파일 내용이 base64 로 오는데 atob 는 한글에서 깨진다
+  const accept = (init && init.raw) ? "application/vnd.github.raw" : "application/vnd.github+json";
+  const headers = { Authorization:"Bearer " + cfg.token, Accept:accept };
+  if(init && init.body) headers["Content-Type"] = "application/json";
+  return fetch(`https://api.github.com/repos/${cfg.repo}/${path}`,
+    Object.assign({ cache:"no-store" }, init, { headers }));
+}
+
+// 설정이 없으면 어느 버튼이든 연결 설정을 펼쳐 준다
+function needCfg(){
+  const cfg = pullCfg();
+  if(cfg.repo && cfg.token) return cfg;
+  document.getElementById("pullCfg").hidden = false;
+  setPullNote("연결 설정 필요", true);
+  return null;
+}
+
+async function pullRemote(){
+  const cfg = needCfg();
+  if(!cfg) return;
+  setPullNote("받는 중…");
+  try{
+    const res = await ghFetch(cfg, "contents/Data/my-holdings.json", { raw:true });
+    if(res.status === 401 || res.status === 403) throw new Error("인증 실패 — 토큰 만료·권한 부족");
+    if(res.status === 404) throw new Error("찾을 수 없음 — 저장소 경로 확인");
+    if(!res.ok) throw new Error("HTTP " + res.status);
+
+    const d = JSON.parse(await res.text());
+    const inGen = d.generated || "", myGen = state.generated || "";
+    if(inGen && myGen && inGen <= myGen && !localStorage.getItem(EDIT_KEY)){
+      setPullNote("이미 최신 · " + stamp(myGen));
+      return;
+    }
+    setPullNote(adopt(d, "원격") ? "불러옴 · " + stamp(d.generated) : cfg.repo);
+  }catch(e){
+    // 화면이 멈추면 안 되므로 실패를 삼키고 저장값을 그대로 쓴다
+    setPullNote(e.message, true);
+  }
+}
+
+/* 갱신 요청 — 러너가 update.py 를 돌리고 Data/ 를 커밋한 뒤 그것을 받아 온다.
+   폰에서 PC 를 켜지 않고 새 값을 얻는 유일한 경로다. 토큰에 actions:write 가 필요하다.
+   dispatch 응답은 실행 id 를 주지 않으므로, 요청 직전 시각보다 뒤에 생긴 실행을 찾는다 */
+const WF_FILE = "update.yml";
+const SYNC_WAIT = 6 * 60 * 1000;
+
+const naptime = ms => new Promise(r => setTimeout(r, ms));
+
+async function syncRemote(){
+  const cfg = needCfg();
+  if(!cfg) return;
+  const btn = document.getElementById("syncBtn");
+  btn.disabled = true;
+  try{
+    const t0 = Date.now();
+    const since = t0 - 60000;   // 러너 시계와 어긋나도 이번 실행을 놓치지 않게 여유를 둔다
+    setPullNote("갱신 요청…");
+    const res = await ghFetch(cfg, `actions/workflows/${WF_FILE}/dispatches`,
+      { method:"POST", body: JSON.stringify({ ref:"main" }) });
+    if(res.status === 401 || res.status === 403) throw new Error("권한 부족 — 토큰에 actions:write 필요");
+    if(res.status === 404) throw new Error("워크플로 없음 — " + WF_FILE);
+    if(!res.ok) throw new Error("HTTP " + res.status);
+
+    const until = t0 + SYNC_WAIT;
+    let run = null;
+    while(Date.now() < until){
+      await naptime(5000);
+      const r = await ghFetch(cfg, `actions/workflows/${WF_FILE}/runs?per_page=5`);
+      if(!r.ok) throw new Error("실행 조회 실패 — HTTP " + r.status);
+      const runs = (await r.json()).workflow_runs || [];
+      run = runs.find(x => new Date(x.created_at).getTime() >= since) || null;
+      if(run && run.status === "completed") break;
+      setPullNote(run ? "갱신 중… " + Math.round((Date.now() - t0) / 1000) + "초" : "러너 대기…");
+    }
+    if(!run || run.status !== "completed") throw new Error("시간 초과 — Actions 탭에서 확인");
+    if(run.conclusion !== "success") throw new Error("갱신 실패 — Actions 로그 확인");
+  }catch(e){
+    setPullNote(e.message, true);
+    btn.disabled = false;
+    return;
+  }
+  btn.disabled = false;
+  await pullRemote();
+}
+
+document.getElementById("syncBtn").onclick = syncRemote;
+document.getElementById("pullBtn").onclick = pullRemote;
+document.getElementById("pullNote").onclick = () => {
+  const el = document.getElementById("pullCfg");
+  el.hidden = !el.hidden;
+};
+document.getElementById("pullSaveBtn").onclick = () => {
+  // 주소를 통째로 붙여 넣어도 받도록 한다 — 폰에서 사용자/저장소만 떼어 치기 번거롭다
+  const repo = document.getElementById("pullRepo").value.trim()
+    .replace(/^https?:\/\/github\.com\//, "").replace(/\.git$/, "").replace(/^\/|\/+$/g, "");
+  const token = document.getElementById("pullToken").value.trim();
+  localStorage.setItem(PULL_KEY, JSON.stringify({ repo, token }));
+  document.getElementById("pullCfg").hidden = true;
+  renderPullCfg();
+};
+renderPullCfg();
 document.getElementById("resetBtn").onclick = () => {
   if(!confirm("저장된 종목·수령·납입·매도·매수 기록을 모두 삭제합니다. 계속할까요?")) return;
   state.holdings = []; state.records = []; state.contributions = []; state.trades = []; state.purchases = [];
+  // 비우고 나면 잃을 것이 없다 — 표식을 남기면 다음 불러오기가 헛되이 확인을 묻는다
+  localStorage.removeItem(EDIT_KEY);
   save(); renderAll();
 };
 
