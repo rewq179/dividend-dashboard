@@ -106,9 +106,21 @@ h2{font-size:15px; margin:0 0 12px; color:var(--tx); font-weight:650; letter-spa
   position:sticky; top:0; z-index:30; background:var(--bg);
   margin:0 -18px 14px; padding:8px 18px 10px;
   border-bottom:1px solid var(--line);
+  display:flex; align-items:center; flex-wrap:wrap; gap:8px;
 }
-/* 계좌 탭이 줄을 다 쓴다 — 네 칸이 균등하게 나눠 가져 어디를 눌러야 할지 폭으로도 드러난다 */
-#accTabs{display:flex}
+/* 계좌 탭이 남은 폭을 다 쓴다 — 네 칸이 균등하게 나눠 가져 어디를 눌러야 할지 폭으로도 드러난다 */
+#accTabs{display:flex; flex:1 1 0; min-width:0}
+/* 갱신은 어느 탭에서든 손이 닿아야 한다. 설정 안에 두면 값이 낡은 것을 알아챈 자리에서
+   두 번 이동해야 한다. 글자를 빼고 아이콘만 남겨 계좌 탭의 폭을 뺏지 않는다 */
+#syncBtn{padding:6px 9px; flex:none}
+#syncBtn svg{margin:0}
+#syncBtn[disabled]{opacity:.6; cursor:default}
+#syncBtn.busy svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* 진행·실패를 여기서 알린다 — 설정 화면의 문구는 다른 탭에 있으면 보이지 않는다 */
+#syncNote{flex:1 0 100%; font-size:11px; color:var(--tx3)}
+#syncNote.err{color:var(--ex)}
+#syncNote[hidden]{display:none}
 #accTabs button{flex:1 1 0; min-width:0; padding:6px 4px; justify-content:center; display:flex; align-items:center; gap:4px}
 #accTabs button .dot{width:7px; height:7px; border-radius:50%}
 #accTabs button span{opacity:.55; font-variant-numeric:tabular-nums}
@@ -693,6 +705,9 @@ td.today .d{font-weight:700; color:var(--tx)}
        홈 첫 카드가 '2026년 배당'으로 시작한다. <title> 은 남겨 홈 화면 아이콘 이름으로 쓴다 -->
   <div id="filterbar">
     <div class="tabs" id="accTabs"></div>
+    <button class="btn" id="syncBtn" title="지금 갱신" aria-label="지금 갱신">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4V1L8 5l4 4V6a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8"/></svg></button>
+    <span id="syncNote" hidden></span>
   </div>
 
   <!-- 아이콘은 파일 안에 직접 그린다 — 아이콘 폰트나 외부 이미지를 쓰면 단일 파일 구조가 깨진다.
@@ -902,8 +917,6 @@ td.today .d{font-weight:700; color:var(--tx)}
     <div class="top" style="margin-bottom:10px">
       <button class="btn sm" id="pullBtn">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 1 9.8 8h-2.5A7.5 7.5 0 0 0 6.3 7.6H9v2.2H2.6V3.4h2.2v2.8A9.96 9.96 0 0 1 12 2m9.4 8.6v6.4h-2.2v-2.8A9.96 9.96 0 0 1 12 22a10 10 0 0 1-9.8-8h2.5a7.5 7.5 0 0 0 13 2.4H15v-2.2z"/></svg>지금 불러오기</button>
-      <button class="btn sm" id="syncBtn" title="원격에서 새로 조회한 뒤 불러온다">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4V1L8 5l4 4V6a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8"/></svg>지금 갱신</button>
       <button class="btn sm" id="importBtn">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 15h-2V5.8L7.9 8.9 6.5 7.5 12 2l5.5 5.5-1.4 1.4L13 5.8zM4 18h16v2.4H4z"/></svg>JSON 불러오기</button>
       <!-- accept 를 두면 안드로이드가 확장자를 MIME 으로 못 읽어 카메라·사진 앱만 띄운다 -->
@@ -3539,19 +3552,34 @@ function ghFetch(cfg, path, init){
     Object.assign({ cache:"no-store" }, init, { headers }));
 }
 
-// 설정이 없으면 어느 버튼이든 연결 설정을 펼쳐 준다
+/* 진행·실패는 두 곳에 함께 적는다. 설정 화면의 문구는 상세를 남기고, 계좌 필터 줄의
+   문구는 다른 탭에서 갱신을 눌렀을 때 유일하게 보이는 자리다 */
+let syncNoteTimer = 0;
+function progress(text, err, keep){
+  setPullNote(text, err);
+  const el = document.getElementById("syncNote");
+  el.className = err ? "err" : "";
+  el.textContent = text;
+  el.hidden = false;
+  clearTimeout(syncNoteTimer);
+  // 실패는 남기고 성공은 걷는다 — 읽을 것이 없는 줄이 계좌 탭 아래에 계속 붙어 있으면 방해다
+  if(!err && !keep) syncNoteTimer = setTimeout(() => { el.hidden = true; }, 5000);
+}
+
+// 설정이 없으면 어느 버튼이든 연결 설정이 있는 곳으로 데려간다
 function needCfg(){
   const cfg = pullCfg();
   if(cfg.repo && cfg.token) return cfg;
+  setTab("more");
   document.getElementById("pullCfg").hidden = false;
-  setPullNote("연결 설정 필요", true);
+  progress("연결 설정 필요", true);
   return null;
 }
 
 async function pullRemote(){
   const cfg = needCfg();
   if(!cfg) return;
-  setPullNote("받는 중…");
+  progress("받는 중…", false, true);
   try{
     const res = await ghFetch(cfg, "contents/Data/my-holdings.json", { raw:true });
     if(res.status === 401 || res.status === 403) throw new Error("인증 실패 — 토큰 만료·권한 부족");
@@ -3561,13 +3589,13 @@ async function pullRemote(){
     const d = JSON.parse(await res.text());
     const inGen = d.generated || "", myGen = state.generated || "";
     if(inGen && myGen && inGen <= myGen && !localStorage.getItem(EDIT_KEY)){
-      setPullNote("이미 최신 · " + stamp(myGen));
+      progress("이미 최신 · " + stamp(myGen));
       return;
     }
-    setPullNote(adopt(d, "원격") ? "불러옴 · " + stamp(d.generated) : cfg.repo);
+    progress(adopt(d, "원격") ? "불러옴 · " + stamp(d.generated) : cfg.repo);
   }catch(e){
     // 화면이 멈추면 안 되므로 실패를 삼키고 저장값을 그대로 쓴다
-    setPullNote(e.message, true);
+    progress(e.message, true);
   }
 }
 
@@ -3587,7 +3615,7 @@ async function syncRemote(){
   try{
     const t0 = Date.now();
     const since = t0 - 60000;   // 러너 시계와 어긋나도 이번 실행을 놓치지 않게 여유를 둔다
-    setPullNote("갱신 요청…");
+    progress("갱신 요청…", false, true);
     const res = await ghFetch(cfg, `actions/workflows/${WF_FILE}/dispatches`,
       { method:"POST", body: JSON.stringify({ ref:"main" }) });
     if(res.status === 401 || res.status === 403) throw new Error("권한 부족 — 토큰에 actions:write 필요");
@@ -3603,12 +3631,12 @@ async function syncRemote(){
       const runs = (await r.json()).workflow_runs || [];
       run = runs.find(x => new Date(x.created_at).getTime() >= since) || null;
       if(run && run.status === "completed") break;
-      setPullNote(run ? "갱신 중… " + Math.round((Date.now() - t0) / 1000) + "초" : "러너 대기…");
+      progress(run ? "갱신 중… " + Math.round((Date.now() - t0) / 1000) + "초" : "러너 대기…", false, true);
     }
     if(!run || run.status !== "completed") throw new Error("시간 초과 — Actions 탭에서 확인");
     if(run.conclusion !== "success") throw new Error("갱신 실패 — Actions 로그 확인");
   }catch(e){
-    setPullNote(e.message, true);
+    progress(e.message, true);
     btn.disabled = false;
     return;
   }
