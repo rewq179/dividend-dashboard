@@ -921,12 +921,11 @@ td.today .d{font-weight:700; color:var(--tx)}
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 15h-2V5.8L7.9 8.9 6.5 7.5 12 2l5.5 5.5-1.4 1.4L13 5.8zM4 18h16v2.4H4z"/></svg>JSON 불러오기</button>
       <!-- accept 를 두면 안드로이드가 확장자를 MIME 으로 못 읽어 카메라·사진 앱만 띄운다 -->
       <input type="file" id="importFile" hidden>
-      <div class="grow"></div>
-      <button class="btn sm danger" id="resetBtn">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 1.5h4V7H4V4.5h4zM6 8.5h12l-.9 12A1.6 1.6 0 0 1 15.5 22h-7a1.6 1.6 0 0 1-1.6-1.5z"/></svg>전체 초기화</button>
-    </div>
-    <div style="margin-bottom:12px">
+      <!-- 연결 상태는 불러오기 버튼 옆에 붙인다 — 따로 떼어 두면 무엇의 상태인지 읽히지 않는다 -->
       <span id="pullNote" class="fx-note" title="눌러서 연결 설정"></span>
+      <!-- grow 대신 auto 마진 — 줄이 접히면 grow 는 윗줄에 남아 위험 버튼이 왼쪽으로 붙는다 -->
+      <button class="btn sm danger" id="resetBtn" style="margin-left:auto">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 1.5h4V7H4V4.5h4zM6 8.5h12l-.9 12A1.6 1.6 0 0 1 15.5 22h-7a1.6 1.6 0 0 1-1.6-1.5z"/></svg>전체 초기화</button>
     </div>
     <div class="pullcfg" id="pullCfg" hidden>
       <div class="setting">
