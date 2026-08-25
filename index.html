@@ -1344,7 +1344,8 @@ const TODAY = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 // 패널별 계좌 필터 — 상단 탭은 요약(히어로·KPI)을 걸러내면서 모든 패널을 한 번에 맞춘다.
 // 패널 탭은 그 뒤에 따로 조정할 수 있어, 같은 화면에서 계좌를 섞어 볼 수 있다
 const PANELS = ["cal", "monthly", "holdings", "records", "trade", "contrib"];
-const ACC_SHORT = { all:"전체", irp:"IRP", pension:"연금", normal:"일반" };
+// 키 순서가 곧 탭 순서다 — ACC_ORDER(일반 → 연금저축 → IRP)와 같게 둔다
+const ACC_SHORT = { all:"전체", normal:"일반", pension:"연금", irp:"IRP" };
 
 // 탭은 화면 상태이므로 데이터(state)에 넣지 않는다 — 테마와 같은 층에 따로 저장한다.
 // 내보낸 JSON 에 섞이면 다른 기기에서 불러올 때 그 기기의 탭이 튄다
