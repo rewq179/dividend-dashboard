@@ -342,18 +342,20 @@ td.today .d{font-weight:700; color:var(--tx)}
    언제인지는 목록이 담당한다. 폰에서는 칸에 글리프만 남아 목록이 유일한 읽기 경로다 */
 .cal-list{margin-top:14px; border-top:1px solid var(--line); padding-top:4px}
 .cal-list:empty{display:none}
-.cal-row{display:flex; gap:14px; padding:9px 0; border-bottom:1px solid var(--line)}
+/* 날짜를 왼쪽 열로 세우면 종목 줄이 86px 을 뺀 폭만 쓰게 돼 이름이 잘렸다.
+   날짜를 윗줄로 빼고 종목을 아래에 쌓아 패널 폭을 통째로 이름에 준다 */
+.cal-row{display:flex; flex-direction:column; gap:5px; padding:9px 0; border-bottom:1px solid var(--line)}
 .cal-row:last-child{border-bottom:0}
 .cal-row.past{opacity:.5}
 .cal-row.today{background:var(--accent-soft); border-radius:8px; padding:9px 10px; margin:0 -10px; border-bottom-color:transparent}
 /* 격자에서 고른 날 — today 는 배경을 쓰므로 겹치지 않게 테두리로 표시한다 */
 .cal-row.sel{outline:2px solid var(--accent); outline-offset:2px; border-radius:8px; opacity:1}
-.cal-date{flex:none; width:86px; padding-top:1px; font-variant-numeric:tabular-nums; white-space:nowrap}
+.cal-date{display:flex; align-items:baseline; gap:6px; font-variant-numeric:tabular-nums; white-space:nowrap}
 .cal-date .dd{font-size:15px; font-weight:650; color:var(--tx); letter-spacing:-.02em}
 .cal-date .dw{font-size:11.5px; color:var(--tx3); margin-left:2px}
-.cal-date .tdy{display:block; font-size:11.5px; color:var(--accent); font-weight:650}
+.cal-date .tdy{font-size:11.5px; color:var(--accent); font-weight:650}
 .cal-date .dw.sun{color:var(--up)} .cal-date .dw.sat{color:var(--down)}
-.cal-items{flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:4px}
+.cal-items{min-width:0; display:flex; flex-direction:column; gap:4px}
 /* 목록에서는 폭이 넉넉하므로 이름과 금액을 한 줄에 둔다 */
 .ev.wide{display:flex; align-items:baseline; gap:10px; padding:4px 8px; margin-bottom:0}
 .ev.wide .r1{flex:1 1 auto; min-width:0}
@@ -744,7 +746,6 @@ td.today .d{font-weight:700; color:var(--tx)}
   /* 히어로는 패딩이 패널과 달라 머리띠 음수 마진을 따로 되돌린다 —
      .panel-head 한 줄로는 특이도가 낮아 데스크톱 값(-20px)이 남고 띠가 카드 밖으로 나간다 */
   .hero .panel-head{margin:-16px -15px 12px; padding:9px 15px}
-  .cal-date{width:64px}
   /* 패널별 계좌 필터를 감춘다. 진입 시 panelAcc 를 전역값으로 정규화하므로 감춰도 값이 어긋나지 않는다 */
   .tabs.mini{display:none}
   /* 일정 탭 머리 — h2 + 뷰 토글이 한 줄, 월 이동이 다음 줄. 셋을 한 줄에 두면 3줄로 접힌다 */
@@ -909,7 +910,7 @@ td.today .d{font-weight:700; color:var(--tx)}
     <div class="donuts" id="holdDonuts"></div>
     <div id="holdSummary" class="legend panel-sum"></div>
     <div class="rlist" id="holdList"></div>
-    <!-- 종목을 늘리는 자리는 목록 끝이다. 더보기까지 가지 않고 보던 자리에서 잇는다 -->
+    <!-- 종목을 늘리는 자리는 목록 끝이다. 접혀 있으면 '더 보기' 다음이지만 여전히 목록에 붙어 있다 -->
     <div class="addrow" style="margin-top:12px">
       <button class="btn" data-add="hold">종목 추가</button>
     </div>
@@ -2176,9 +2177,11 @@ function renderLimit(){
 const WEEKDAY = ["일", "월", "화", "수", "목", "금", "토"];
 const EV_ORDER = { got: 0, pay: 1, buy: 2, ex: 3 };
 
-// 칩 = 색 막대(종류) + 글리프(색 없이도 구분) + 짧은 이름(줄어듦) + 금액(안 잘림)
+// 칩 = 색 막대(종류) + 글리프(색 없이도 구분) + 이름 + 금액(안 잘림)
 // wide=true 면 목록 뷰용으로 이름과 금액을 한 줄에 둔다
 function calChip(e, wide){
+  // 목록은 패널 폭을 통째로 쓰므로 풀네임이 들어간다. 격자 칸은 좁아 짧은 이름이어야 한다
+  const nm = h => wide ? (h.name || shortOf(h)) : shortOf(h);
   const chip = (kind, glyph, label, amount, tip) =>
     `<div class="ev ${kind}${wide ? " wide" : ""}" title="${esc(tip)}"><div class="r1"><span class="gl">${glyph}</span>` +
     `<span class="nm">${esc(label)}</span></div><span class="am">${amount}</span></div>`;
@@ -2188,20 +2191,20 @@ function calChip(e, wide){
   if(e.type === "got"){
     const v = won(recNetKrw(e.r));
     const one = localAmt(e.r.perShare, e.r.market);
-    return chip("got", "◆", shortOfRecord(e.r), v + per(one),
+    return chip("got", "◆", wide ? recName(e.r) : shortOfRecord(e.r), v + per(one),
       `${recName(e.r)} · 실수령 ${v}원 (주당 ${one} × ${e.r.shares}주)`);
   }
   if(e.type === "pay"){
     const h = e.p.h;
     const one = localAmt(e.p.per * netFactor(h), h.market);
     const mark = e.p.fixed ? `${one} 확정` : `~${one}`;
-    return chip("pay", "●", shortOf(h), won(e.p.krw) + per(mark),
+    return chip("pay", "●", nm(h), won(e.p.krw) + per(mark),
       `${h.name} · 지급 예정 ${won(e.p.krw)}원 (주당 ${e.p.fixed ? "확정" : "추정"} ${one} × ${h.shares}주)`);
   }
   // 매수 마감은 같은 날 여러 종목이 겹치므로 칩 하나로 묶는다 — 날짜만 알면 되는 정보다
   if(e.type === "buy"){
-    const names = e.list.map(p => shortOf(p.h)).join(", ");
-    const label = e.list.length === 1 ? `${shortOf(e.list[0].h)} 매수 마감` : `매수 마감 ${e.list.length}종목`;
+    const names = e.list.map(p => nm(p.h)).join(", ");
+    const label = e.list.length === 1 ? `${nm(e.list[0].h)} 매수 마감` : `매수 마감 ${e.list.length}종목`;
     const est = e.list.some(p => !p.fixed);
     // 한 종목만 걸린 날은 금액을 낸다. 여러 종목이 묶인 날은 낼 숫자가 하나로 정해지지 않는다
     const mark = est ? "추정"
@@ -2214,7 +2217,7 @@ function calChip(e, wide){
   /* 배당락 칩은 총액이 아니라 주당 금액을 낸다 — 이 날 들어오는 돈이 아니라 확정된 단가라서다.
      아직 공시 전이면 낼 숫자가 없으므로 그대로 '추정'으로 둔다 */
   const exOne = localAmt(e.p.per * netFactor(e.p.h), e.p.h.market);
-  return chip("ex", "▲", shortOf(e.p.h), per(e.p.fixed ? exOne : "추정"),
+  return chip("ex", "▲", nm(e.p.h), per(e.p.fixed ? exOne : "추정"),
     `${e.p.h.name} · 배당락 ${e.p.fixed ? "공시일" : "추정일"}. ` +
     `${iso(e.p.buy)}까지 매수해야 ${iso(e.p.pay)}에 지급됩니다`);
 }
@@ -2262,7 +2265,11 @@ function renderCalFixed(){
   }
   const md = d => (d.getMonth() + 1) + "/" + String(d.getDate()).padStart(2, "0")
     + `(${WEEKDAY[d.getDay()]})`;
-  document.getElementById("calFixList").innerHTML = rows.map(p => {
+  /* 공용 임계값(6)이 아니라 3이다 — 한 줄이 2줄짜리라 6건이면 패널 하나가 화면을 채우고,
+     일정 탭의 본체인 달력이 통째로 스크롤 아래로 밀린다 */
+  const sl = sliceRows("calfix", rows, 3);
+  const el = document.getElementById("calFixList");
+  el.innerHTML = sl.list.map(p => {
     const h = p.h;
     const net = p.per * netFactor(h);
     const one = localAmt(net, h.market);
@@ -2275,7 +2282,8 @@ function renderCalFixed(){
         <span>지급<b>${md(p.pay)}</b></span>
         <span class="per">주당 ${one}${rate ? " · " + rate : ""}</span></div>
     </div>`;
-  }).join("");
+  }).join("") + rMore("calfix", sl);
+  bindMore(el);
 }
 
 function renderCalendar(){
@@ -2291,8 +2299,19 @@ function renderCalendar(){
   const events = {};
   const buyDays = {};
   const inMonth = d => d.getFullYear() === calY && d.getMonth() + 1 === calM;
+  /* 배당락은 종목의 사건이지 계좌의 사건이 아니다 — 같은 ETF를 두 계좌에 담았다고
+     같은 날 두 줄이 서면 회차가 둘인 것처럼 읽힌다. 지급과 매수 마감은 묶지 않는다:
+     계좌마다 들어오는 돈이 따로고 사야 할 수량도 따로다.
+     ticker 가 비어 있는 종목(손으로 넣은 것)은 이름으로 가른다 */
+  const exSeen = new Set();
   for(const p of allPayments([calY - 1, calY, calY + 1], "cal")){
-    if(inMonth(p.ex)) (events[p.ex.getDate()] ||= []).push({ type:"ex", p });
+    if(inMonth(p.ex)){
+      const key = iso(p.ex) + "|" + (p.h.ticker || p.h.name);
+      if(!exSeen.has(key)){
+        exSeen.add(key);
+        (events[p.ex.getDate()] ||= []).push({ type:"ex", p });
+      }
+    }
     if(inMonth(p.buy)) (buyDays[p.buy.getDate()] ||= []).push(p);
     // 0원 지급 칩은 걸러낸다 — 지난 회차의 미수령분(missed)이나 분배금 미입력 종목이라 알릴 게 없다
     if(p.krw > 0 && inMonth(p.pay) && !settled.has(p.h.id)){
@@ -2746,7 +2765,8 @@ function renderHoldings(){
   const totalAnnual = rows.reduce((s,h) => s + annualKrw(h), 0);
   const totalValue = rows.reduce((s,h) => s + valueKrw(h), 0);
 
-  rList("holdList", rows.map(h => {
+  const sl = sliceRows("hold", rows);
+  rList("holdList", sl.list.map(h => {
     const v = valueKrw(h), c = costKrw(h);
     const diff = c > 0 ? v - c : null;
     const diffLocal = c > 0 ? valueLocal(h) - costLocal(h) : 0;
@@ -2767,7 +2787,7 @@ function renderHoldings(){
       foot: needsInput(h) ? "분배금 미확인" : `연 ${amtOf(h, annualKrw(h), annualLocal(h))}`,
       footCls: needsInput(h) ? "" : "recv",
     });
-  }), "");
+  }), "", "hold", sl);
   sm.innerHTML = `
     <span>평가금액 <b class="mono">${won(totalValue)}원</b></span>
     <span>월 예상 배당 <b class="mono recv">${won(totalAnnual/12)}원</b></span>
@@ -2802,12 +2822,17 @@ function renderHoldChange(){
   // 이름은 설정과 무관하게 짧은 쪽으로 고정한다(달력과 같은 규칙) — 한 줄에 등락률·금액까지
   // 들어가는 목록이라 풀네임을 두면 이름이 잘려 어느 종목인지 못 읽는다.
   // 계좌 꼬리표는 같은 ETF 를 두 계좌에 보유하면 이름만으로 두 줄이 구별되지 않아 붙인다
-  document.getElementById("holdChgList").innerHTML = rated.map(x => `
+  // 빠진 종목 줄은 접기 밖이다 — 목록의 일부가 아니라 합계의 한계를 밝히는 줄이라
+  // 접힌 상태에서 사라지면 합계가 전 종목을 담은 것으로 읽힌다
+  const sl = sliceRows("holdChg", rated);
+  const el = document.getElementById("holdChgList");
+  el.innerHTML = sl.list.map(x => `
     <div class="chg-row">
       <span class="nm">${accDot(x.h.account)}${esc(shortOf(x.h) || x.h.name)}</span>
       <span class="rt ${dayCls(x.d)}">${dayPct(x.d, x.b)}</span>
       <span class="am ${dayCls(x.d)}">${dayAmt(x.d)}원</span>
-    </div>`).join("") + skipRow;
+    </div>`).join("") + skipRow + rMore("holdChg", sl);
+  bindMore(el);
 
   document.getElementById("holdChgSummary").innerHTML = `
     <span>합계 <b class="mono ${dayCls(diff)}">${dayAmt(diff)}원</b></span>
