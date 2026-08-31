@@ -2779,7 +2779,8 @@ function renderHoldings(){
       edit: { kind: "hold", id: h.id },
       val: amtOf(h, v, valueLocal(h)),
       sub: [`${h.shares}주`,
-            h.avgPrice ? `평단 ${localAmt(h.avgPrice, h.market)}` : null].filter(Boolean).join(" · "),
+            h.avgPrice ? `평단 ${localAmt(h.avgPrice, h.market)}` : null,
+            h.price ? `현재가 ${localAmt(h.price, h.market)}` : null].filter(Boolean).join(" · "),
       // 손익은 평가금액에 딸린 값이라 맥락 줄 오른쪽에 둔다 — 주 금액 바로 아래가 그 자리다
       subVal: diffText,
       subValCls: diff === null ? "" : pnlCls(diff),
