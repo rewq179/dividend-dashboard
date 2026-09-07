@@ -1029,6 +1029,8 @@ td.today .d{font-weight:700; color:var(--tx)}
       <input type="file" id="importFile" hidden>
       <!-- 연결 상태는 불러오기 버튼 옆에 붙인다 — 따로 떼어 두면 무엇의 상태인지 읽히지 않는다 -->
       <span id="pullNote" class="fx-note" title="눌러서 연결 설정"></span>
+      <button class="btn sm" id="payAllBtn">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20m-1.2 14.6-4.2-4.2 1.6-1.6 2.6 2.6 5.4-5.4 1.6 1.6z"/></svg>지난 확정분 수령 처리</button>
       <!-- grow 대신 auto 마진 — 줄이 접히면 grow 는 윗줄에 남아 위험 버튼이 왼쪽으로 붙는다 -->
       <button class="btn sm danger" id="resetBtn" style="margin-left:auto">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 1.5h4V7H4V4.5h4zM6 8.5h12l-.9 12A1.6 1.6 0 0 1 15.5 22h-7a1.6 1.6 0 0 1-1.6-1.5z"/></svg>전체 초기화</button>
@@ -3957,6 +3959,50 @@ document.getElementById("pullSaveBtn").onclick = () => {
   renderPullCfg();
 };
 renderPullCfg();
+/* update.py 가 공시로 채운 divNext 는 다음 회차 공시가 나오면 덮인다.
+   지급일이 지난 확정 회차를 기록으로 옮길 수 있는 것은 그 사이뿐이라 한 번에 모아 넣는다 */
+function pendingPayouts(){
+  const today = iso(TODAY);
+  const out = [];
+  for(const h of state.holdings){
+    if(h.divNext == null || !h.divNextPay || !(h.shares > 0)) continue;
+    if(h.divNextPay >= today) continue;
+    if(recIndex().has(h.id + "|" + h.divNextPay.slice(0, 7))) continue;
+    const gross = h.divNext * h.shares;
+    out.push({ h, net: Math.round(gross * (1 - taxRate(h))) });
+  }
+  return out.sort((a, b) => a.h.divNextPay.localeCompare(b.h.divNextPay)
+    || a.h.name.localeCompare(b.h.name, "ko"));
+}
+
+document.getElementById("payAllBtn").onclick = () => {
+  const list = pendingPayouts();
+  if(list.length === 0){ alert("지급일이 지난 확정 회차 중 수령 기록이 빠진 것이 없습니다."); return; }
+  /* 수량은 지금 보유분이라 배당락 뒤에 산 주식까지 섞일 수 있다.
+     어느 매수가 배당락 뒤였는지 가릴 근거가 없으므로 수량을 나열해 눈으로 거르게 한다 */
+  const lines = list.map(p =>
+    `${p.h.divNextPay}  ${p.h.name}  ${p.h.shares}주 × ${p.h.divNext}원 = ${won(p.net)}원`);
+  const total = list.reduce((a, p) => a + toKrw(p.net, p.h.market), 0);
+  if(!confirm(`아래 ${list.length}건을 수령 기록으로 넣습니다. 합계 ${won(total)}원.\n`
+    + `수량이 배당락일 기준과 다르면 취소하고 개별로 넣으세요.\n\n${lines.join("\n")}`)) return;
+  const batch = Date.now();
+  list.forEach((p, i) => {
+    state.records.push({
+      id: "r" + batch + "-" + i,
+      holdingId: p.h.id,
+      name: p.h.name,
+      account: p.h.account,
+      market: p.h.market,
+      date: p.h.divNextPay,
+      shares: p.h.shares,
+      perShare: p.h.divNext,
+      net: p.net,
+      memo: "일괄 수령 처리"
+    });
+  });
+  save(true); renderAll();
+};
+
 document.getElementById("resetBtn").onclick = () => {
   if(!confirm("저장된 종목·수령·납입·매도·매수 기록을 모두 삭제합니다. 계속할까요?")) return;
   state.holdings = []; state.records = []; state.contributions = []; state.trades = []; state.purchases = [];
