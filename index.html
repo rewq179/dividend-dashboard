@@ -925,6 +925,7 @@ td.today .d{font-weight:700; color:var(--tx)}
       <span><b class="gl buy">◇</b> 매수 마감 (이 날까지 사야 받음)</span>
       <span><b class="gl ex">▲</b> 배당락</span>
       <span><b class="gl pay">●</b> 지급 예정</span>
+      <span><b class="gl pay">○</b> 수령 확인 대기</span>
       <span><b class="gl got">◆</b> 실제 수령</span>
       <span style="color:var(--tx3)">수령 기록이 있으면 예정 표시는 숨깁니다</span>
     </div>
@@ -1862,16 +1863,22 @@ function paymentsOf(h, years){
       // exDay 는 회차별 배당락일의 최빈값이라 위클리 상품은 달마다 하루씩 어긋난다.
       // 공시가 난 회차는 추정 대신 실제 배당락일을 쓴다 — 매수 마감일이 여기서 갈린다
       const guess = prevBiz(mkDate(y, m, h.exDay));
-      const one = perShareOf(h, guess);
-      const ex = (one.fixed && h.divNextEx)
-        ? mkDate(+h.divNextEx.slice(0, 4), +h.divNextEx.slice(5, 7), +h.divNextEx.slice(8, 10))
+      // 지급이 끝난 회차를 주기에서 다시 추정하면 미래 지급으로 되살아난다.
+      const last = h.divLast != null && h.divLastEx && h.divLastPay
+        && h.divLastEx.slice(0, 7) === iso(guess).slice(0, 7)
+        && h.divLastPay < iso(TODAY);
+      const one = last ? { amt: h.divLast, fixed: false } : perShareOf(h, guess);
+      const exIso = last ? h.divLastEx : one.fixed ? h.divNextEx : null;
+      const ex = exIso
+        ? mkDate(+exIso.slice(0, 4), +exIso.slice(5, 7), +exIso.slice(8, 10))
         : guess;
       const t = m + (h.payOffset || 0);
       const py = y + Math.floor((t - 1) / 12);
       const pm = ((t - 1) % 12) + 1;
-      // 확정 회차에 공시 실지급일이 있으면 payDay 추정보다 그쪽이 정확하다
-      const pay = (one.fixed && h.divNextPay)
-        ? mkDate(+h.divNextPay.slice(0, 4), +h.divNextPay.slice(5, 7), +h.divNextPay.slice(8, 10))
+      // 회차별 지급일이 있으면 payDay 추정보다 그쪽이 정확하다
+      const payIso = last ? h.divLastPay : one.fixed ? h.divNextPay : null;
+      const pay = payIso
+        ? mkDate(+payIso.slice(0, 4), +payIso.slice(5, 7), +payIso.slice(8, 10))
         : nextBiz(mkDate(py, pm, h.payDay || h.exDay));
       const buy = buyByOf(ex);
       /* 매수 마감일이 보유 시작보다 앞서면 그 회차는 아예 없던 일이다 — 배당락 때 주주가
@@ -2222,6 +2229,10 @@ function calChip(e, wide){
   }
   if(e.type === "pay"){
     const h = e.p.h;
+    if(e.p.missed){
+      return chip("pay", "○", nm(h), "수령 확인 대기",
+        `${h.name} · ${iso(e.p.pay)} 지급분 · 실제 입금 확인 후 수령 처리하세요`);
+    }
     const one = localAmt(e.p.per * netFactor(h), h.market);
     const mark = e.p.fixed ? `${one} 확정` : `~${one}`;
     return chip("pay", "●", nm(h), won(e.p.krw) + per(mark),
@@ -2339,8 +2350,10 @@ function renderCalendar(){
       }
     }
     if(inMonth(p.buy)) (buyDays[p.buy.getDate()] ||= []).push(p);
-    // 0원 지급 칩은 걸러낸다 — 지난 회차의 미수령분(missed)이나 분배금 미입력 종목이라 알릴 게 없다
-    if(p.krw > 0 && inMonth(p.pay) && !settled.has(p.h.id)){
+    // 지급일이 지나도 회차 정보가 있으면 수령 확인 대상으로 남기되, 추정 이력은 늘리지 않는다.
+    const pending = p.missed && p.per > 0 && p.h.shares > 0
+      && p.h.divLastEx === iso(p.ex) && p.h.divLastPay === iso(p.pay);
+    if((p.krw > 0 || pending) && inMonth(p.pay) && !settled.has(p.h.id)){
       (events[p.pay.getDate()] ||= []).push({ type:"pay", p });
     }
   }
