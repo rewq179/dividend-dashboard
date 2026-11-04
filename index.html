@@ -1597,11 +1597,36 @@ function load(){
   }catch(e){ console.warn("저장 데이터를 읽지 못했습니다", e); }
 
   const seed = seedData();
-  const useSeed = seed && (!stored || (seed.generated || "") > (stored.generated || ""));
-  const d = useSeed ? seed : stored;
+  let useSeed = seed && (!stored || (seed.generated || "") > (stored.generated || ""));
+  // 수령 기록 밖의 편집은 병합되지 않아, 묻지 않고 갈아타면 잃은 줄도 모른다
+  if(useSeed && stored && localStorage.getItem(EDIT_KEY)
+    && !confirm("앱에서 고친 종목·납입·매도·매수 기록이 있습니다.\n새 데이터로 덮어쓸까요? 수령 기록은 유지됩니다.")) useSeed = false;
+  const d = useSeed ? withLocalRecords(seed, stored && stored.records) : stored;
   if(!d) return;
   apply(d);
-  if(useSeed) save();
+  if(useSeed){
+    localStorage.removeItem(EDIT_KEY);
+    save();
+  }
+}
+
+function recKey(r){
+  return r.holdingId && r.date ? r.holdingId + "|" + r.date.slice(0, 7) : null;
+}
+
+/* 받은 데이터로 기록을 통째로 덮으면 기기에서 고친 수령 기록이 사라진다.
+   추정(est)보다 기기에서 넣거나 고친 기록을 앞세우고, 나머지는 받은 쪽을 따른다 */
+function withLocalRecords(d, local){
+  const out = Array.isArray(d.records) ? d.records.slice() : [];
+  const byId = new Map(out.map((r, i) => [r.id, i]));
+  const byKey = new Map(out.map((r, i) => [recKey(r), i]));
+  byKey.delete(null);   // 종목에 연결되지 않은 기록은 회차를 가릴 수 없어 id 로만 맞댄다
+  for(const r of local || []){
+    const i = byId.has(r.id) ? byId.get(r.id) : byKey.get(recKey(r));
+    if(i === undefined) out.push(r);
+    else if(out[i].est && !r.est) out[i] = r;
+  }
+  return Object.assign({}, d, { records: out });
 }
 
 /* touched 는 종목·기록을 사람이 고쳤다는 뜻이다. 받아 온 데이터는 apply 로 통째로
@@ -1824,7 +1849,8 @@ function recIndex(){
   if(_recIndex) return _recIndex;
   _recIndex = new Set();
   for(const r of state.records){
-    if(r.holdingId && r.date) _recIndex.add(r.holdingId + "|" + r.date.slice(0, 7));
+    const key = recKey(r);
+    if(key) _recIndex.add(key);
   }
   return _recIndex;
 }
@@ -3544,7 +3570,7 @@ document.getElementById("recForm").onsubmit = e => {
   }else{
     state.records.push(data);
   }
-  save(true); closeRecModal(); renderAll();
+  save(); closeRecModal(); renderAll();
 };
 
 document.getElementById("recDelBtn").onclick = () => {
@@ -3552,7 +3578,7 @@ document.getElementById("recDelBtn").onclick = () => {
   if(!r) return;
   if(!confirm(`${r.date} '${recName(r)}' 수령 기록을 삭제할까요?`)) return;
   state.records = state.records.filter(x => x.id !== recEditId);
-  save(true); closeRecModal(); renderAll();
+  save(); closeRecModal(); renderAll();
 };
 
 document.getElementById("recCancelBtn").onclick = closeRecModal;
@@ -3814,10 +3840,10 @@ function adopt(d, where){
   if(inGen && myGen && inGen < myGen)
     why.push(`${where} 데이터가 더 오래됐습니다 — ${stamp(inGen)} < ${stamp(myGen)}`);
   const edited = localStorage.getItem(EDIT_KEY);
-  if(edited) why.push(`${stamp(edited)} 이후 앱에서 고친 기록이 있습니다`);
-  if(why.length && !confirm(why.join("\n") + "\n\n덮어쓸까요?")) return false;
+  if(edited) why.push(`${stamp(edited)} 이후 앱에서 고친 종목·납입·매도·매수 기록이 있습니다`);
+  if(why.length && !confirm(why.join("\n") + "\n\n덮어쓸까요? 수령 기록은 유지됩니다.")) return false;
 
-  apply(d);
+  apply(withLocalRecords(d, state.records));
   localStorage.removeItem(EDIT_KEY);
   save();
   renderAll();
@@ -3916,6 +3942,17 @@ async function pullRemote(){
   }
 }
 
+// 앱 편집이 남은 기기에서 시작 때마다 덮어쓸지 물으면 열 때마다 막히므로 문구만 남긴다
+function autoPull(){
+  const cfg = pullCfg();
+  if(!cfg.repo || !cfg.token) return;
+  if(localStorage.getItem(EDIT_KEY)){
+    progress("앱 편집이 있어 자동 불러오기를 건너뜀");
+    return;
+  }
+  pullRemote();
+}
+
 /* 갱신 요청 — 러너가 update.py 를 돌리고 Data/ 를 커밋한 뒤 그것을 받아 온다.
    폰에서 PC 를 켜지 않고 새 값을 얻는 유일한 경로다. 토큰에 actions:write 가 필요하다.
    dispatch 응답은 실행 id 를 주지 않으므로, 요청 직전 시각보다 뒤에 생긴 실행을 찾는다 */
@@ -3982,9 +4019,10 @@ renderPullCfg();
 function pendingPayouts(){
   const today = iso(TODAY);
   // 증권사 연동이 살아 있는 계좌는 update.py 가 실제 입금액으로 기록한다.
-  // 여기서 추정값을 먼저 넣으면 같은 달 키에 막혀 실제값이 들어가지 못한다
+  // 여기서 추정값을 먼저 넣으면 같은 달 키에 막혀 실제값이 들어가지 못한다.
+  // 연금저축·IRP 는 update.py 가 공시 회차로 기록하므로 처음부터 제외한다
   const fresh = Date.now() - 7 * 864e5;
-  const linked = new Set();
+  const linked = new Set(["pension", "irp"]);
   for(const b of Object.values(state.brokers || {})){
     if(b.ok && b.syncedAt && new Date(b.syncedAt).getTime() >= fresh) (b.accounts || []).forEach(a => linked.add(a));
   }
@@ -4033,7 +4071,7 @@ document.getElementById("payAllBtn").onclick = () => {
       memo: "일괄 수령 처리"
     });
   });
-  save(true); renderAll();
+  save(); renderAll();
 };
 
 document.getElementById("resetBtn").onclick = () => {
@@ -4076,6 +4114,7 @@ load();
 initTabs();
 renderAll();
 fetchFx();
+autoPull();
 </script>
 </body>
 </html>
