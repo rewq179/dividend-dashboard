@@ -4138,17 +4138,36 @@ function needCfg(){
   return null;
 }
 
-async function pullRemote(){
+async function fetchRemote(cfg){
+  const res = await ghFetch(cfg, "contents/Data/my-holdings.json", { raw:true });
+  if(res.status === 401 || res.status === 403) throw new Error("인증 실패 — 토큰 만료·권한 부족");
+  if(res.status === 404) throw new Error("찾을 수 없음 — 저장소 경로 확인");
+  if(!res.ok) throw new Error("HTTP " + res.status);
+  return JSON.parse(await res.text());
+}
+
+/* 러너 실행이 끝난 직후 contents API 가 커밋 전 판본을 준 적이 있다(2026-11-07, 같은 op 재전송).
+   낡은 판본에는 내 nonce 가 없어 큐를 못 비우므로, 보낸 편집이 있으면 nonce 가 보일 때까지 다시 받는다 */
+const ACK_RETRY = 3, ACK_WAIT = 5000;
+
+async function pullRemote(nonce){
   const cfg = needCfg();
   if(!cfg) return;
   progress("받는 중…", false, true);
   try{
-    const res = await ghFetch(cfg, "contents/Data/my-holdings.json", { raw:true });
-    if(res.status === 401 || res.status === 403) throw new Error("인증 실패 — 토큰 만료·권한 부족");
-    if(res.status === 404) throw new Error("찾을 수 없음 — 저장소 경로 확인");
-    if(!res.ok) throw new Error("HTTP " + res.status);
-
-    const d = JSON.parse(await res.text());
+    let d = await fetchRemote(cfg);
+    const seen = x => (Array.isArray(x.editLog) ? x.editLog : []).some(e => e.nonce === nonce);
+    if(typeof nonce === "string"){
+      for(let i = 0; i < ACK_RETRY && !seen(d); i++){
+        progress("반영 확인 중…", false, true);
+        await naptime(ACK_WAIT);
+        d = await fetchRemote(cfg);
+      }
+      if(!seen(d)){
+        progress("반영 확인 대기 — 보낸 편집은 다음 갱신 때 다시 확인", true);
+        return;
+      }
+    }
     const inGen = d.generated || "", myGen = state.generated || "";
     if(inGen && myGen && inGen <= myGen && !localStorage.getItem(EDIT_KEY)){
       progress("이미 최신 · " + stamp(myGen));
@@ -4189,6 +4208,7 @@ async function syncRemote(){
   if(!cfg) return;
   const btn = document.getElementById("syncBtn");
   btn.disabled = true;
+  let sent = null;
   try{
     const t0 = Date.now();
     const since = t0 - 60000;   // 러너 시계와 어긋나도 이번 실행을 놓치지 않게 여유를 둔다
@@ -4207,6 +4227,7 @@ async function syncRemote(){
       // 요청 응답을 못 받아도 러너가 적용했을 수 있으므로 보내기 전에 남긴다
       q.sent = q.sent.concat({ nonce, revs: Object.fromEntries(batch.map(o => [opKey(o), o.rev])) }).slice(-20);
       saveQueue(q);
+      sent = nonce;
     }
     const res = await ghFetch(cfg, `actions/workflows/${WF_FILE}/dispatches`,
       { method:"POST", body: JSON.stringify({ ref:"main", inputs }) });
@@ -4234,8 +4255,9 @@ async function syncRemote(){
     btn.disabled = false;
     return;
   }
+  // 확인 재수신 중에 다시 누르면 같은 op 가 또 나가므로 받기까지 끝난 뒤 켠다
+  await pullRemote(sent);
   btn.disabled = false;
-  await pullRemote();
 }
 
 document.getElementById("syncBtn").onclick = syncRemote;
