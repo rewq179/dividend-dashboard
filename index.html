@@ -173,6 +173,10 @@ h2{font-size:15px; margin:0 0 12px; color:var(--tx); font-weight:650; letter-spa
 /* 패널별 계좌 필터 — 패널 머리글에 여러 컨트롤이 붙으므로 한 단계 작게 */
 .tabs.mini{padding:2px}
 .tabs.mini button{padding:4px 9px; font-size:12px}
+/* 기록 모달의 계좌 탭 — 세 칸이 폭을 균등하게 나눠 폰에서도 한 줄에 든다 */
+.tabs.acc-pick{margin-bottom:14px}
+.acc-pick button{flex:1 1 0; display:flex; align-items:center; justify-content:center; gap:5px}
+.acc-pick .dot{width:8px; height:8px; border-radius:50%}
 .sel{
   background:var(--panel); color:var(--tx); border:1px solid var(--line);
   border-radius:8px; padding:5px 8px; font:inherit; font-size:12.5px; flex:none;
@@ -252,7 +256,6 @@ body:has(.mask.on) .tabbar{display:none}
 .hero .lab{font-size:12px; font-weight:650; color:var(--tx2)}
 .hero .base{font-size:12px; color:var(--tx3); margin:2px 0 10px}
 .hero .base b{color:var(--tx2); font-weight:600}
-.hero .base .ann{display:block; margin-top:2px}
 .hero .sub{font-size:13px; color:var(--tx2); display:flex; flex-direction:column}
 .hero .sub > span{display:flex; align-items:baseline; justify-content:space-between; gap:10px;
   padding:6px 0; border-top:1px solid var(--line)}
@@ -262,6 +265,10 @@ body:has(.mask.on) .tabbar{display:none}
 /* 구성 항목이 숫자 옆이 아니라 아래 줄로 내려가므로 크게 세워도 서로 가리지 않는다 */
 .hero .val{font-size:38px; font-weight:750; letter-spacing:-.035em; line-height:1.12}
 .hero .val .unit{font-size:14px; font-weight:500; color:var(--tx2); margin-left:3px; letter-spacing:0}
+.hero .lab .mo{font-weight:400; color:var(--tx3); margin-left:4px}
+/* 이번 달 받은 몫. 트랙은 남은 예상이다 — 합계 숫자만으로는 어디까지가 확정인지 읽히지 않는다 */
+.hmeter{height:6px; border-radius:3px; background:var(--line); overflow:hidden; margin:10px 0 8px}
+.hmeter i{display:block; height:100%; background:var(--recv); border-radius:3px}
 
 .kpi{background:var(--panel2); border-radius:6px; padding:14px 16px}
 .kpi .label{font-size:12px; color:var(--tx2); font-weight:600; margin-bottom:6px}
@@ -272,7 +279,7 @@ body:has(.mask.on) .tabbar{display:none}
 .kpi .val .unit{font-size:14px; font-weight:500; color:var(--tx2); margin-left:1px}
 /* 월별 목록(.mgroup)도 '이름 왼쪽 · 금액 오른쪽 · 줄당 한 항목'이 그대로 맞아 같은 규칙을 쓴다.
    맨 앞을 .sub 만으로 쓸 수는 없다 — 표의 계좌 소계 행이 tr.sub 라 그쪽까지 걸린다 */
-.kpi .sub, .mgroup .sub{font-size:11.5px; color:var(--tx3); margin-top:8px; display:flex; flex-direction:column; gap:3px}
+.kpi .sub, .mgroup .sub{font-size:12px; color:var(--tx3); margin-top:8px; display:flex; flex-direction:column; gap:3px}
 .kpi .sub > span, .mgroup .sub > span{display:flex; align-items:baseline; justify-content:space-between; gap:10px}
 .kpi .sub em, .mgroup .sub em{font-style:normal; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .kpi .sub b, .mgroup .sub b{color:var(--tx2); font-weight:650; white-space:nowrap; font-variant-numeric:tabular-nums}
@@ -334,7 +341,7 @@ td.today .d{font-weight:700; color:var(--tx)}
    라이트 모드 aqua가 3:1 미달이라 글리프+라벨이 식별을 담당해야 한다.
    이름과 금액을 두 줄로 나눈다 — 한 줄에 붙이면 긴 상품명이 잘린다 */
 .ev{
-  display:block; font-size:11px; line-height:1.35; border-radius:4px;
+  display:block; font-size:12px; line-height:1.35; border-radius:4px;
   padding:3px 5px 4px 5px; margin-bottom:3px;
   color:var(--tx); background:var(--panel2); border-left:3px solid var(--line);
 }
@@ -377,8 +384,8 @@ td.today .d{font-weight:700; color:var(--tx)}
 .cal-row.sel{outline:2px solid var(--accent); outline-offset:2px; border-radius:8px; opacity:1}
 .cal-date{display:flex; align-items:baseline; gap:6px; font-variant-numeric:tabular-nums; white-space:nowrap}
 .cal-date .dd{font-size:15px; font-weight:650; color:var(--tx); letter-spacing:-.02em}
-.cal-date .dw{font-size:11.5px; color:var(--tx3); margin-left:2px}
-.cal-date .tdy{font-size:11.5px; color:var(--accent); font-weight:650}
+.cal-date .dw{font-size:12px; color:var(--tx3); margin-left:2px}
+.cal-date .tdy{font-size:12px; color:var(--accent); font-weight:650}
 .cal-date .dw.sun{color:var(--up)} .cal-date .dw.sat{color:var(--down)}
 .cal-items{min-width:0; display:flex; flex-direction:column; gap:4px}
 /* 목록에서는 폭이 넉넉하므로 이름과 금액을 한 줄에 둔다 */
@@ -399,7 +406,7 @@ td.today .d{font-weight:700; color:var(--tx)}
 .fix-row .am{flex:none; margin-left:auto; font-size:13px; font-weight:650; color:var(--recv);
   white-space:nowrap; font-variant-numeric:tabular-nums}
 .fix-row .dt{flex:1 0 100%; display:flex; flex-wrap:wrap; gap:2px 14px;
-  font-size:11.5px; color:var(--tx3); font-variant-numeric:tabular-nums}
+  font-size:12px; color:var(--tx3); font-variant-numeric:tabular-nums}
 .fix-row .dt b{color:var(--tx2); font-weight:650; margin-left:4px}
 .fix-row .dt .per{margin-left:auto}
 /* 머리띠와 목록 사이에 끼는 요약 줄. 선이 없으면 목록 첫 항목과 한 덩어리로 읽혀
@@ -409,11 +416,14 @@ td.today .d{font-weight:700; color:var(--tx)}
 .legend span{display:flex; align-items:center; gap:6px}
 .legend b{color:var(--tx); font-size:13.5px; font-weight:650}
 /* 달력 범례는 기호 풀이라 한눈에 훑기만 하면 된다 — 기본 간격이면 폰에서 세 줄로 퍼진다 */
-.legend.cal-legend{gap:4px 12px; font-size:11.5px}
-/* 막대 아래 올해 합계 — 막대(월별 분해)와 끊어 읽히게 선을 두고, 줄이 접혀도 한 묶음으로 붙인다.
-   흘려 두면 폰 폭에서 3+1로 접혀 마지막 값만 혼자 떨어진다 — 2열로 고정해 위아래로 견주게 한다 */
-.legend.flow-sum{display:grid; grid-template-columns:1fr 1fr; gap:6px 16px; margin-top:14px; padding-top:10px; border-top:1px solid var(--line)}
-.legend.flow-sum .tag{grid-column:1 / -1; justify-self:start}
+.legend.cal-legend{gap:4px 12px; font-size:12px; margin-top:8px}
+.cal-fold summary .gl{margin-left:5px; font-weight:400}
+.cal-fold summary .gl.buy{color:var(--warn)} .cal-fold summary .gl.ex{color:var(--ex)}
+.cal-fold summary .gl.pay{color:var(--pay)} .cal-fold summary .gl.got{color:var(--got)}
+/* 막대 아래 읽기 줄 — 계좌 줄과 연 요약 줄을 같은 세 칸 양끝 정렬로 두어 위아래로 견주게 한다.
+   금액이 커져 넘치면 접힌다 — 칸을 고정하면 셋째가 혼자 한 줄을 차지한다 */
+.legend.flow-read{margin-top:12px; padding-top:12px; border-top:1px solid var(--line)}
+.legend.flow-row{justify-content:space-between; gap:6px 10px; margin-top:8px}
 /* 위 규칙이 의미색(.recv/.out/.pos/.neg)보다 특이도가 높아, 그냥 두면 요약 줄의 금액만
    검정으로 묻힌다 — 같은 값이 목록에서는 초록인데 요약에서는 아닌 상태가 된다 */
 .legend b.recv{color:var(--recv)}
@@ -477,31 +487,38 @@ td.today .d{font-weight:700; color:var(--tx)}
 /* 안쪽 지름이 67이라 15px에서는 "1014.8만" 같은 값이 링에 닿는다 */
 .donut .hole{fill:var(--tx); font-size:13px; font-weight:700}
 .donut .hole-cap{fill:var(--tx3); font-size:9.5px; font-weight:400}
-.donut-keys{display:flex; flex-direction:column; gap:6px; font-size:13px; color:var(--tx2)}
+.donut-keys{display:flex; flex-direction:column; gap:6px; font-size:13px; color:var(--tx)}
 .donut-keys span{display:flex; align-items:center; gap:6px; white-space:nowrap}
 .donut-keys b{color:var(--tx); font-weight:650; font-variant-numeric:tabular-nums}
 .donut-keys i{color:var(--tx3); font-style:normal; font-variant-numeric:tabular-nums}
-
 /* 자산 구성 — 원 오른쪽에 예수금, 그 아래 전폭으로 종목 목록.
    종목 이름을 줄임말이 아니라 전체로 쓰므로 범례가 원 옆에 있으면 폭이 모자란다 */
-.donut-wide{display:grid; grid-template-columns:auto 1fr; gap:14px 22px; justify-items:start; justify-content:start}
-.donut-wide > svg{grid-column:1; grid-row:1}
-.donut-wide .donut-side{grid-column:2; grid-row:1; align-self:center; cursor:pointer}
+/* 원·계좌별 자산·예수금 세 덩어리를 한 줄에 같은 간격으로 세운다. 양끝과 사이를 같은 1fr 빈 칸으로
+   두는 이유 — space-evenly 는 바깥 여백을 칸으로 치지 않아 아래 전폭 목록이 그만큼 좁아진다.
+   묶음 상자를 풀어(contents) 두 묶음을 원과 같은 grid 줄의 항목으로 놓는다 */
+.donut-wide{display:grid; grid-template-columns:1fr auto 1fr auto 1fr auto 1fr; align-items:center; gap:14px 0}
+.donut-wide > svg{grid-row:1; grid-column:2}
+.donut-wide .donut-side{display:contents}
+.donut-wide .ds-g{grid-row:1; grid-column:4}
+.donut-wide .ds-g + .ds-g{grid-column:6}
 .donut-wide .donut-keys{grid-column:1 / -1; grid-row:2; width:100%}
 .donut-wide .donut-keys em{max-width:none; flex:1 1 auto}
 .donut-wide .donut-keys span{width:100%}
-.donut-side{display:flex; flex-direction:column; align-items:flex-start; gap:5px; font-size:13px; color:var(--tx2)}
+.donut-side{display:flex; align-items:flex-start; gap:16px; font-size:13px; color:var(--tx2)}
+.donut-side .ds-g{display:flex; flex-direction:column; align-items:flex-start; gap:5px}
 .donut-side em{font-style:normal}
 /* 머리는 종목 범례 한 줄과 같은 모양이다 — 예수금도 조각 하나이므로 같은 규칙으로 읽힌다 */
 .donut-side .ds-h{display:flex; align-items:center; gap:6px; cursor:pointer; color:var(--tx); font-weight:650}
-/* 계좌 줄은 머리보다 한 단계 작게 — 같은 크기면 어느 것이 상위인지 알 수 없다 */
-.donut-side .ds-r{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--tx3); padding-left:2px}
-.donut-side .ds-r em{font-style:normal; min-width:4.5em}
-.donut-side .ds-r b{color:var(--tx2); font-size:12px; font-weight:600; font-variant-numeric:tabular-nums}
+.donut-side .ds-t{color:var(--tx); font-weight:650}
+/* 계좌 줄은 머리보다 한 단계 작게 — 같은 크기면 어느 것이 상위인지 알 수 없다.
+   색은 아래 종목 범례와 같다 — 같은 원의 금액이 줄마다 다른 회색이면 위계가 아니라 오류로 읽힌다 */
+.donut-side .ds-r{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--tx); padding-left:2px}
+.donut-side .ds-r em{font-style:normal; min-width:2.4em}
+.donut-side .ds-r b{font-size:12px; font-weight:650; font-variant-numeric:tabular-nums}
 
 /* 시장 지수 — 머리 맨 아래 참고 띠. 한 지수가 한 줄이고 두 열로 접는다.
    네 개를 한 줄에 늘어놓으면 폰 폭에서 뒤쪽 지수가 잘린다 */
-.idx{border-top:1px solid var(--line); padding:8px 0 10px; font-size:11.5px; color:var(--tx3)}
+.idx{border-top:1px solid var(--line); padding:8px 0 10px; font-size:12px; color:var(--tx3)}
 .idx[hidden]{display:none}
 .idx-body{display:grid; grid-template-columns:1fr 1fr; gap:3px 14px}
 .idx .cell{display:flex; align-items:baseline; gap:6px; white-space:nowrap; font-variant-numeric:tabular-nums}
@@ -527,6 +544,18 @@ td.today .d{font-weight:700; color:var(--tx)}
 .chg-skip .nm{flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .chg-skip .rt{flex:none}
 
+/* 다가오는 배당 — 이름이 짧은이름이라 날짜 열을 고정 폭으로 떼어도 잘리지 않는다 */
+.up-row{display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid var(--line)}
+.up-row:last-of-type{border-bottom:0}
+.up-d{flex:0 0 48px; display:flex; flex-direction:column; line-height:1.25; font-variant-numeric:tabular-nums}
+.up-d b{font-size:15px; font-weight:700; letter-spacing:-.02em}
+.up-d span{font-size:12px; color:var(--accent); font-weight:650}
+.up-row .nm{flex:1 1 auto; min-width:0; font-size:14px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.up-row .am{flex:none; display:flex; flex-direction:column; align-items:flex-end; line-height:1.3; font-variant-numeric:tabular-nums}
+.up-row .am b{font-size:14.5px}
+.up-row .am span{font-size:12px; color:var(--tx3)}
+.up-rest{font-size:12px; color:var(--tx3); padding-top:6px}
+
 /* 고른 날로 스크롤할 때 sticky 계좌 필터 아래로 내려앉게 하는 여백 */
 .cal-row{scroll-margin-top:64px}
 
@@ -535,33 +564,23 @@ td.today .d{font-weight:700; color:var(--tx)}
 .donut.picked .donut-side .ds-h:not(.on){opacity:.45}
 
 /* ---- 홈 월별 흐름 막대 ----
-   막대 자체는 월별 배당 표와 같은 .bar/.seg 관용구를 쓴다. 길이는 --v(막대), --s(조각 비율)로
-   받아 방향을 CSS 가 정한다 — 넓은 화면은 세로 12칸, 폰은 가로 12행 (폰 블록에서 뒤집는다) */
-.flow{display:flex; align-items:flex-end; gap:4px; height:150px}
+   막대 자체는 월별 배당 표와 같은 .bar/.seg 관용구를 쓴다. 길이는 --v(막대), --s(조각 비율)로 받는다.
+   12칸 한 줄이다 — 6칸×2줄은 상반기 줄이 비어도 높이를 그대로 먹었다. 360px 폭에서 칸이 24px 라
+   막대 머리에 금액을 얹으면 이웃 칸과 겹치므로 금액은 월 아래(.vlab)로 내리고 짧게 줄인다 */
+.flow{display:flex; align-items:flex-end; gap:3px; height:146px}
 .flow .col{
-  flex:1 1 0; min-width:0; height:100%;
+  flex:1 1 0; min-width:0; height:100%; cursor:pointer;
   display:flex; flex-direction:column; justify-content:flex-end; align-items:center;
 }
-/* 아직 안 들어온 달은 눌러 둔다 — 색이 아니라 농도로 갈라 계좌 3색의 의미를 지킨다.
-   .bar 에 걸면 그 안의 금액 라벨까지 흐려진다 (opacity 는 자식에서 되돌릴 수 없다) */
+/* 아직 안 들어온 달은 눌러 둔다 — 색이 아니라 농도로 갈라 계좌 3색의 의미를 지킨다 */
 .flow .col.est .seg{opacity:.5}
-/* 라벨을 막대 머리에 붙인다 (absolute). 칸 위쪽에 흐름대로 두면 막대가 짧은 달에서 숫자만
-   덩그러니 위에 떠 어느 막대의 값인지 끊어진다. 그러려면 .bar 의 overflow 를 풀어야 하므로
-   위쪽 모서리 둥글리기를 맨 위 조각(column-reverse 라 마지막 자식)으로 옮긴다 */
-.flow .bar{gap:2px; height:calc(var(--v) * 1%); position:relative; overflow:visible}
+/* 위쪽 모서리 둥글리기를 맨 위 조각(column-reverse 라 마지막 자식)에 둔다 — 고른 달 테두리(outline)가
+   잘리지 않게 .bar 의 overflow 를 풀었기 때문이다 */
+.flow .bar{gap:2px; height:calc(var(--v) * 1%); overflow:visible}
 .flow .bar > .seg:last-child{border-radius:4px 4px 0 0}
 .flow .seg{height:calc(var(--s) * 1%)}
-/* 12칸에 금액을 다 붙이면 라벨이 그래프를 덮으므로 최댓값·이번 달만 남긴다 (폰은 두 줄이라 전부 남긴다) */
-.flow .amt{
-  position:absolute; bottom:100%; left:50%; transform:translateX(-50%); margin-bottom:3px;
-  font-size:10.5px; font-weight:600; color:var(--tx2);
-  white-space:nowrap; font-variant-numeric:tabular-nums;
-}
-.flow .amt:not([data-key]){visibility:hidden}
-/* 막대 높이의 100% 가 걸릴 상자. padding-top 이 가장 높은 막대의 라벨 자리를 남긴다 —
-   백분율 높이는 padding 을 뺀 content 상자에 걸리므로 라벨이 패널 밖으로 넘지 않는다 */
 .flow .plot{
-  flex:1 1 auto; min-height:0; width:100%; padding-top:20px;
+  flex:1 1 auto; min-height:0; width:100%; padding-top:4px;
   display:flex; align-items:flex-end; justify-content:center;
   border-bottom:1px solid var(--rule);
 }
@@ -571,6 +590,14 @@ td.today .d{font-weight:700; color:var(--tx)}
   font-variant-numeric:tabular-nums; white-space:nowrap;
 }
 .flow .col.now .mlab{color:var(--tx); font-weight:650}
+.flow .col.pick .mlab{color:var(--accent); font-weight:700}
+.flow .col.pick .bar{outline:2px solid var(--accent); outline-offset:1px}
+/* 금액이 없는 달도 줄 높이를 둔다 — 비면 그 칸만 막대 바닥선이 내려앉는다 */
+.flow .vlab{flex:none; min-height:12px; font-size:10px; line-height:1.2; color:var(--tx2); font-weight:600; letter-spacing:-.04em;
+  white-space:nowrap; font-variant-numeric:tabular-nums}
+.flow .col.est .vlab{color:var(--tx3); font-weight:400}
+/* 고른 달의 정확한 금액 — 폰은 hover 가 없어 title 로는 읽을 길이 없고, 막대 아래 금액은 반올림이다 */
+.flow-read .mo{font-style:normal; font-size:11px; color:var(--tx3)}
 
 /* ---- 막대 ---- */
 /* 홈의 월별 흐름(.flow)이 쓰는 관용구. 계좌 색을 세로로 쌓아 한 달을 한 칸으로 만든다.
@@ -594,7 +621,7 @@ td.today .d{font-weight:700; color:var(--tx)}
 .ritem:last-child{border-bottom:0}
 .rtop{display:flex; align-items:baseline; justify-content:space-between; gap:10px}
 .rtop .nm{
-  font-size:14px; font-weight:650; color:var(--tx);
+  font-size:14px; font-weight:600; color:var(--tx);
   min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
 .rtop b{font-size:15px; font-weight:650; white-space:nowrap; font-variant-numeric:tabular-nums}
@@ -602,15 +629,18 @@ td.today .d{font-weight:700; color:var(--tx)}
 .nm > i.dot{margin-right:5px}
 .rmid, .rbot{
   display:flex; align-items:center; justify-content:space-between; gap:10px;
-  margin-top:3px; font-size:11.5px; color:var(--tx3);
+  margin-top:3px; font-size:12px; color:var(--tx3);
 }
 .rmid > span, .rbot > span{
   white-space:nowrap; font-variant-numeric:tabular-nums; min-width:0;
   overflow:hidden; text-overflow:ellipsis;
 }
 /* 길이만으로는 몇 %인지 감이 오지 않아 숫자를 옆에 붙인다. 무엇에 대한 비중인지도 함께 */
-.wbar{flex:0 0 72px; height:3px; border-radius:2px; background:var(--track); position:relative}
+.wbar{flex:0 0 72px; height:5px; border-radius:3px; background:var(--track); position:relative}
 .rbot .bp{margin-right:auto; color:var(--tx3)}
+/* 보조 줄의 의미색은 굵기를 뺀다 — 오른쪽에 굵은 숫자가 셋 쌓이면 주 금액이 어느 것인지 갈리지 않는다.
+   색이 손익·배당을 이미 말해 준다 */
+.rmid .pos, .rmid .neg, .rmid .recv, .rbot .pos, .rbot .neg, .rbot .recv{font-weight:500}
 .wbar::after{
   content:""; position:absolute; top:0; bottom:0; left:0;
   width:calc(var(--p) * 1%); background:var(--accent); border-radius:2px;
@@ -619,6 +649,8 @@ td.today .d{font-weight:700; color:var(--tx)}
 /* 기록 추가 버튼 — 폰 폭에서 셋씩 접힌다. 자주 쓰는 것부터 앞에 둔다 */
 .addrow{display:flex; gap:8px; flex-wrap:wrap}
 .addrow .btn{flex:1 1 auto; justify-content:center}
+.panel.addpanel{padding:12px 16px}
+.addpanel .btn{padding:9px 12px; font-size:13.5px; font-weight:600}
 /* 목록 행을 누르면 그 기록의 모달이 열린다 — 눌리는 줄임을 손끝보다 먼저 알려야 한다 */
 .ritem.tap{cursor:pointer}
 .ritem.tap:hover{background:var(--accent-soft); border-radius:8px;
@@ -631,6 +663,8 @@ td.today .d{font-weight:700; color:var(--tx)}
 .mgroup:last-child{border-bottom:0}
 .mgroup .sub{margin-top:6px}
 .mhead{display:flex; align-items:baseline; justify-content:space-between; gap:10px; font-size:13.5px; font-weight:650}
+/* b 의 기본값 bolder 가 650 위에서는 900 이 된다 — 다른 목록의 주 금액과 같은 650 에 묶는다 */
+.mhead b{font-weight:650}
 .mgroup.now .mhead{color:var(--accent)}
 .mhead .est{font-style:normal; font-size:11px; font-weight:400; color:var(--tx3); margin-left:3px}
 
@@ -677,17 +711,27 @@ td.today .d{font-weight:700; color:var(--tx)}
 .meter{height:8px; border-radius:5px; background:var(--track); overflow:hidden}
 .meter i{display:block; height:100%; background:var(--pay); border-radius:5px}
 .meter i.over{background:var(--warn)}
+.limit .mrow{display:flex; align-items:center; gap:8px}
+.limit .mrow .meter{flex:1 1 auto}
+.limit .mp{flex:none; min-width:2.6em; text-align:right; font-size:12px; font-weight:650; color:var(--tx2); font-variant-numeric:tabular-nums}
 .limit .nums{display:flex; gap:4px 12px; margin-top:7px; font-size:12px; color:var(--tx2); flex-wrap:wrap}
 .limit .nums span{white-space:nowrap}
 .limit .nums b{color:var(--tx); font-weight:650; font-variant-numeric:tabular-nums}
 /* .recv/.out 은 이 규칙보다 특이도가 낮아 그냥은 묻힌다 */
 .limit .nums b.recv{color:var(--recv)}
 .limit .nums b.out{color:var(--tx2)}
-.note{font-size:11.5px; color:var(--tx3); margin-top:12px; line-height:1.5}
+.note{font-size:12px; color:var(--tx3); margin-top:12px; line-height:1.5}
 /* 한 번 읽으면 되는 설명은 접어 둔다 — 펼쳐 두면 설정·납입 패널이 설명 길이만큼 늘어난다 */
 details.fold{margin-top:12px}
 details.fold > summary{font-size:12px; color:var(--tx2); cursor:pointer; padding:2px 0}
 details.fold > #dataStatus{margin-top:10px}
+/* 보유 요약 — 라벨 위·값 아래 세 칸. 한 줄에 라벨과 값을 번갈아 이으면 어디서 끊어 읽을지 갈리지 않는다 */
+#holdSummary{display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-top:0}
+#holdSummary .st{flex-direction:column; align-items:flex-start; gap:1px}
+#holdSummary .st em{font-style:normal; font-size:12px; color:var(--tx3)}
+#holdSummary .st b{font-size:15px}
+details.donut-fold{margin:0 0 4px; padding-bottom:10px; border-bottom:1px solid var(--line)}
+details.donut-fold > .donuts{margin:12px 0 0}
 /* 설정 토글 — 줄마다 둘씩 흘려 두면 이름 길이에 따라 두 줄의 열이 어긋난다 */
 .toggles{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px}
 .set-h{font-size:12px; font-weight:650; color:var(--tx2); margin:16px 0 10px; padding-top:14px; border-top:1px solid var(--line)}
@@ -759,19 +803,13 @@ details.fold > #dataStatus{margin-top:10px}
   .grid2{grid-template-columns:1fr}
   .donuts{grid-template-columns:1fr}
   .bar-col .amt{display:none}
-  /* 세로 막대를 유지하되 12칸을 6칸씩 두 줄로 접는다. 한 줄에 12칸을 세우면 한 칸이 29px 이라
-     막대도 월도 금액도 뭉개진다 — 두 줄로 나누면 칸이 55px 로 넓어져 모든 달에 금액을 붙일 수 있다.
-     선택 라벨 규칙을 되돌리려면 같은 특이도로 받아야 한다 (.flow .amt 만으로는 :not() 에 진다) */
-  .flow{flex-wrap:wrap; align-items:stretch; height:auto; row-gap:16px}
-  .flow .col{flex:0 0 calc((100% - 20px) / 6); height:118px}
-  .flow .amt:not([data-key]){visibility:visible}
 
   /* 도넛 범례를 아래가 아니라 옆에 둔다. 링을 조금 줄여 이름이 들어갈 폭을 만든다 */
   /* 링과 범례를 grid 트랙으로 나눈다. flex 로 두면 범례 폭이 남은 자리(백분율)로 정해지는데,
      조각을 짚을 때 그 기준이 17.6px 어긋나 이름이 잘리는 정도가 프레임마다 달라진다 —
      짚는 종목을 왔다갔다하면 그 흔들림이 계속 반복된다. 트랙 폭(124px + 1fr)은 상태와 무관하다 */
   #assetMix .donut{
-    display:grid; grid-template-columns:124px minmax(0, 1fr); gap:12px; align-items:center;
+    display:grid; grid-template-columns:1fr 124px 1fr auto 1fr auto 1fr; gap:12px 0; align-items:center;
   }
   #assetMix .donut > svg{width:124px; height:124px}
   #assetMix .donut-keys{min-width:0; font-size:12px; gap:5px}
@@ -788,7 +826,7 @@ details.fold > #dataStatus{margin-top:10px}
   /* 일정 탭 머리 — h2 + 뷰 토글이 한 줄, 월 이동이 다음 줄. 셋을 한 줄에 두면 3줄로 접힌다 */
   .cal-nav{flex-basis:100%; justify-content:space-between}
   /* 제목의 괄호 주석은 h2 의 nowrap 을 물려받아 패널 밖으로 밀려난다 — 줄을 내려 접히게 한다 */
-  #barYear, #flowNote{display:block; white-space:normal; font-size:11.5px}
+  #barYear{display:block; white-space:normal; font-size:11.5px}
   /* 월별 배당만 월 단위 목록(#monthList)을 쓰고 나머지 다섯은 .rlist 를 쓴다 */
   .rlist, #monthList{display:block}
   /* 종목별 전일 대비 — 360px 화면은 이름·점·숫자 두 열을 합쳐 310px 안에 넣어야 한다.
@@ -805,11 +843,14 @@ details.fold > #dataStatus{margin-top:10px}
   table.cal td.sel{outline:2px solid var(--accent); outline-offset:-2px}
   /* 격자 안에서만 글리프로 줄인다. 격자 아래 상세(.cal-row)는 이름·금액을 그대로 읽어야 하므로
      선택자를 table.cal 아래로 묶는다 — 묶지 않으면 폰에서 내용을 읽을 경로가 사라진다 */
-  table.cal .ev{display:inline-block; padding:0 1px; margin:0; background:none; border-left:0}
+  table.cal .ev{display:inline-block; padding:0; margin:0; background:none; border-left:0}
   table.cal .ev .r1{display:inline}
   table.cal .ev .nm, table.cal .ev .am{display:none}
-  table.cal .ev .gl{font-size:11px}
-  table.cal .ev.more{display:none}
+  /* 360px 화면의 칸 안쪽이 약 43px 이라 글리프 셋(배당락이 몰리는 날)이 한 줄에 들려면 13px 가 한계다 */
+  table.cal .ev .gl{font-size:13px}
+  /* 넘친 건수는 '+N'만 남긴다 — 숨기면 그날 일정이 더 있는지 알 길이 없다 */
+  table.cal .ev.more{display:block; font-size:10.5px; padding:0; color:var(--tx2); font-weight:650}
+  table.cal .ev.more .mx{display:none}
   /* svg 160px + 범례를 한 줄에 두면 349px 칸을 넘긴다 */
   .donut{flex-direction:column; gap:12px}
 }
@@ -881,9 +922,18 @@ details.fold > #dataStatus{margin-top:10px}
       </div>
     </div>
 
+    <!-- '언제 얼마가 들어오나'를 홈에서 답한다. 달력까지 가야 알던 것을 세 줄로 올린다 -->
+    <div class="panel" id="upPanel">
+      <div class="panel-head">
+        <h2>다가오는 배당 <span class="count" id="upCount"></span></h2>
+        <button class="btn sm" id="upMore">일정 보기</button>
+      </div>
+      <div id="upList"></div>
+    </div>
+
     <div class="panel">
       <div class="panel-head">
-        <h2>월별 배당 흐름 <span id="flowNote" class="mono" style="color:var(--tx3);font-weight:400"></span></h2>
+        <h2>월별 배당 흐름</h2>
       </div>
       <div id="flowGraph"></div>
     </div>
@@ -920,6 +970,9 @@ details.fold > #dataStatus{margin-top:10px}
     <table class="cal" id="calGrid"><thead><tr>
       <th class="sun">일</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th class="sat">토</th>
     </tr></thead><tbody id="calBody"></tbody></table>
+    <!-- 기호는 한 번 익히면 되는 풀이라 접어 둔다. 펼치면 격자와 목록 사이를 두 줄 먹는다 -->
+    <details class="fold cal-fold">
+    <summary>기호 설명 <b class="gl buy">◇</b><b class="gl ex">▲</b><b class="gl pay">●</b><b class="gl pay">○</b><b class="gl got">◆</b></summary>
     <div class="legend cal-legend">
       <span><b class="gl buy">◇</b> 매수 마감 (이 날까지 사야 받음)</span>
       <span><b class="gl ex">▲</b> 배당락</span>
@@ -928,6 +981,7 @@ details.fold > #dataStatus{margin-top:10px}
       <span><b class="gl got">◆</b> 실제 수령</span>
       <span style="color:var(--tx3)">수령 기록이 있으면 예정 표시는 숨깁니다</span>
     </div>
+    </details>
     <div id="calList" class="cal-list"></div>
   </div>
   </section>
@@ -939,8 +993,13 @@ details.fold > #dataStatus{margin-top:10px}
       <div class="tabs mini" data-acc-panel="holdings"></div>
       <select class="sel" id="sortSel" title="정렬 기준"></select>
     </div>
-    <div class="donuts" id="holdDonuts"></div>
     <div id="holdSummary" class="legend panel-sum"></div>
+    <!-- 도넛 둘이 첫 화면을 다 써서 종목 목록이 밀렸다. 계좌 비중은 가끔 보는 값이라 접는다.
+         도넛은 계좌 탭과 무관하게 전체를 그리므로 제목에 그 기준을 밝힌다 -->
+    <details class="fold donut-fold">
+    <summary>계좌별 구성 · 전체 계좌 기준</summary>
+    <div class="donuts" id="holdDonuts"></div>
+    </details>
     <div class="rlist" id="holdList"></div>
     <!-- 종목을 늘리는 자리는 목록 끝이다. 접혀 있으면 '더 보기' 다음이지만 여전히 목록에 붙어 있다 -->
     <div class="addrow" style="margin-top:12px">
@@ -963,12 +1022,23 @@ details.fold > #dataStatus{margin-top:10px}
     <div class="panel-head">
       <h2>월별 배당 <span id="barYear" class="mono" style="color:var(--tx3);font-weight:400"></span></h2>
       <div class="tabs mini" data-acc-panel="monthly"></div>
+      <div class="tabs" id="monthTabs">
+        <button data-mv="sum">간단</button><button data-mv="detail">디테일</button>
+      </div>
     </div>
     <div id="monthList"></div>
   </div>
   </section>
 
   <section class="pane" id="pane-records">
+  <!-- 기록을 보는 자리에서 바로 더한다. 더보기 탭에만 두면 목록에서 빠진 걸 알아챈 뒤 두 번 이동해야 한다 -->
+  <div class="panel addpanel">
+    <div class="addrow">
+      <button class="btn primary" data-add="buy">+ 매수</button>
+      <button class="btn" data-add="rec">+ 배당 수령</button>
+      <button class="btn" data-add="trade">+ 매도</button>
+    </div>
+  </div>
   <div class="panel">
     <div class="panel-head">
       <h2>배당 수령 이력 <span class="count" id="recCount"></span></h2>
@@ -1018,7 +1088,7 @@ details.fold > #dataStatus{margin-top:10px}
   <div class="panel">
     <div class="panel-head">
       <h2>납입 기록</h2>
-      <span class="rt mono" id="contribYear" style="color:var(--tx2);font-size:12.5px"></span>
+      <span class="lim-note mono" id="contribYear"></span>
       <div class="tabs mini" data-acc-panel="contrib"></div>
     </div>
     <div class="limits" id="limits"></div>
@@ -1124,16 +1194,9 @@ details.fold > #dataStatus{margin-top:10px}
 <div class="mask" id="mask">
   <div class="modal">
     <h2 id="modalTitle">종목 추가</h2>
+    <div class="tabs acc-pick" id="f_acc"></div>
     <form id="form">
       <div class="grid2">
-        <div class="f">
-          <label>계좌</label>
-          <select id="f_account">
-            <option value="irp">IRP</option>
-            <option value="pension">연금저축</option>
-            <option value="normal">일반</option>
-          </select>
-        </div>
         <div class="f">
           <label>시장</label>
           <select id="f_market">
@@ -1229,6 +1292,7 @@ details.fold > #dataStatus{margin-top:10px}
 <div class="mask" id="recMask">
   <div class="modal">
     <h2 id="recModalTitle">수령 기록 추가</h2>
+    <div class="tabs acc-pick" id="r_acc"></div>
     <form id="recForm">
       <div class="grid2">
         <div class="f">
@@ -1245,14 +1309,6 @@ details.fold > #dataStatus{margin-top:10px}
         <div class="f">
           <label>종목명 (청산·기타)</label>
           <input id="r_name" placeholder="KODEX 미국배당커버드콜">
-        </div>
-        <div class="f">
-          <label>계좌</label>
-          <select id="r_account">
-            <option value="irp">IRP</option>
-            <option value="pension">연금저축</option>
-            <option value="normal">일반</option>
-          </select>
         </div>
         <div class="f">
           <label>시장</label>
@@ -1296,16 +1352,9 @@ details.fold > #dataStatus{margin-top:10px}
 <div class="mask" id="cMask">
   <div class="modal">
     <h2 id="cTitle">납입 기록 추가</h2>
+    <div class="tabs acc-pick" id="c_acc"></div>
     <form id="cForm">
       <div class="grid2">
-        <div class="f">
-          <label>계좌</label>
-          <select id="c_account">
-            <option value="normal">일반</option>
-            <option value="pension">연금저축</option>
-            <option value="irp">IRP</option>
-          </select>
-        </div>
         <div class="f">
           <label>납입일</label>
           <input id="c_date" type="date" required>
@@ -1332,6 +1381,7 @@ details.fold > #dataStatus{margin-top:10px}
 <div class="mask" id="tMask">
   <div class="modal">
     <h2 id="tTitle">매도 기록 추가</h2>
+    <div class="tabs acc-pick" id="t_acc"></div>
     <form id="tForm">
       <div class="grid2">
         <div class="f">
@@ -1347,14 +1397,6 @@ details.fold > #dataStatus{margin-top:10px}
         <div class="f">
           <label>종목명 (청산·기타)</label>
           <input id="t_name" placeholder="KODEX 미국배당커버드콜">
-        </div>
-        <div class="f">
-          <label>계좌</label>
-          <select id="t_account">
-            <option value="irp">IRP</option>
-            <option value="pension">연금저축</option>
-            <option value="normal">일반</option>
-          </select>
         </div>
         <div class="f">
           <label>시장</label>
@@ -1412,6 +1454,7 @@ details.fold > #dataStatus{margin-top:10px}
 <div class="mask" id="bMask">
   <div class="modal">
     <h2 id="bTitle">매수 기록 추가</h2>
+    <div class="tabs acc-pick" id="b_acc"></div>
     <form id="bForm">
       <div class="grid2">
         <div class="f">
@@ -1427,14 +1470,6 @@ details.fold > #dataStatus{margin-top:10px}
         <div class="f">
           <label>종목명 (청산·기타)</label>
           <input id="b_name" placeholder="KODEX 미국배당커버드콜">
-        </div>
-        <div class="f">
-          <label>계좌</label>
-          <select id="b_account">
-            <option value="irp">IRP</option>
-            <option value="pension">연금저축</option>
-            <option value="normal">일반</option>
-          </select>
         </div>
         <div class="f">
           <label>시장</label>
@@ -1514,6 +1549,7 @@ let state = {
   sort: "annual",
   recView: "agg",
   tradeView: "buy",
+  monthView: "sum",
   account: "all",
   panelAcc: {},
   generated: "",
@@ -1557,6 +1593,7 @@ function apply(d){
   for(const p of PANELS) state.panelAcc[p] = state.account;
   state.recView = d.recView === "list" ? "list" : "agg";
   state.tradeView = d.tradeView === "sell" ? "sell" : "buy";
+  state.monthView = d.monthView === "detail" ? "detail" : "sum";
   state.holdings = Array.isArray(d.holdings) ? d.holdings : [];
   state.records = Array.isArray(d.records) ? d.records : [];
   state.contributions = Array.isArray(d.contributions) ? d.contributions : [];
@@ -1739,7 +1776,7 @@ function save(touched){
   localStorage.setItem(KEY, JSON.stringify({
     fx: state.fx, netMode: state.netMode, shortName: state.shortName, blind: state.blind, usdMode: state.usdMode,
     sort: state.sort, recView: state.recView,
-    tradeView: state.tradeView, panelAcc: state.panelAcc, generated: state.generated || "",
+    tradeView: state.tradeView, monthView: state.monthView, panelAcc: state.panelAcc, generated: state.generated || "",
     holdings: state.holdings, records: state.records,
     contributions: state.contributions, trades: state.trades, purchases: state.purchases,
     holidays: state.holidays, brokers: state.brokers, cashActual: state.cashActual,
@@ -2165,12 +2202,11 @@ function periodDividend(y, m){
   const prefix = m ? `${y}-${String(m).padStart(2,"0")}` : String(y);
   const inPeriod = d => d.getFullYear() === y && (!m || d.getMonth() + 1 === m);
 
-  let fixed = 0, count = 0;
+  let fixed = 0;
   for(const r of filteredRecords()){
     if(!r.date.startsWith(prefix)) continue;
     // 세전 보기에서는 실적도 원천징수 전 금액이어야 예상분과 축이 같아진다
     fixed += state.netMode ? recNetKrw(r) : toKrw(recGross(r), r.market);
-    count++;
   }
 
   let est = 0;
@@ -2179,7 +2215,7 @@ function periodDividend(y, m){
     if(!inPeriod(p.pay) || recIndex().has(p.h.id + "|" + iso(p.pay).slice(0, 7))) continue;
     est += p.krw;
   }
-  return { fixed, est, count, total: fixed + est };
+  return { fixed, est, total: fixed + est };
 }
 
 /* 손익 표기 — 부호를 앞에 두고 값은 절댓값을 쓴다. 마이너스는 하이픈이 아니라 U+2212 라
@@ -2212,16 +2248,12 @@ function subRows(rows){
     .map(([k, v]) => `<span><em>${k}</em><b>${v}</b></span>`).join("")}</div>`;
 }
 
-/* 홈 히어로 = 총 수익. 뷰당 하나뿐인 큰 숫자 자리를 성과가 갖는다 — 배당 예상액이 그 자리에
-   있으면 '확정 + 예상'이라는 단서를 매번 다시 읽어야 무슨 수인지 알 수 있었다.
-   연 배당은 월별 흐름 막대 아래 요약으로 보낸다. 아직 벌어지지 않은 예측값이라 실제 성과와
-   같은 목록에 세울 수 없다.
+/* 홈 히어로 = 이번 달 배당. 배당 앱을 여는 첫 질문이 '이번 달 얼마'라 큰 숫자 자리를 그것이 갖는다.
+   예전에는 총 수익이 이 자리였다 — '확정 + 예상' 합계가 무슨 수인지 매번 다시 읽어야 했기 때문인데,
+   받은 몫을 막대와 숫자로 따로 세워 그 혼동을 막는다.
 
    총 수익 = 평가손익 + 실현 매매손익 + 누적 배당. 청산분을 빼면 실제 성과가 아니다.
-   비율은 분모(넣은 돈)와 한 문장으로 붙인다 — 큰 수 옆에 %만 두면 무엇으로 나눈 값인지 알 수 없고,
-   넣은 돈을 보조 줄에 세우면 기준값이 구성요소(배당·매도·평가)와 같은 형태로 섞인다.
-
-   이번 달 확정분은 '받은 배당'에 괄호로 붙인다 — 누적의 가장 최근 증분이라 같은 줄에서 읽힌다 */
+   비율은 분모(넣은 돈)를 라벨에 붙인다 — %만 두면 무엇으로 나눈 값인지 알 수 없다 */
 function renderHero(){
   const hs = filtered();
   const value = hs.reduce((s,h) => s + valueKrw(h), 0);
@@ -2240,19 +2272,47 @@ function renderHero(){
   const invLabel = f.paidOnly ? "넣은 돈 (납입)" : "넣은 돈 (순투입)";
   const ann = rate === null ? null : xirr(f.flows, f.invested + overall);
 
+  const got = md.total > 0 ? Math.min(100, (md.fixed / md.total) * 100) : 0;
   document.getElementById("hero").innerHTML = `
-    <div class="lab">총 수익</div>
-    <div class="val mono ${pnlCls(overall)}">${signedAmt(overall)}<span class="unit">원</span></div>
-    <div class="base">${rate === null
-      ? `${invLabel} 미상 — 기록 필요`
-      : `${invLabel} <b class="mono">${won(f.invested)}원</b> 대비 <span class="${pnlCls(rate)}">${signedPct(rate)}</span>` +
-        (ann === null ? "" : `<span class="ann">연환산 수익률 <span class="${pnlCls(ann)}">${signedPct(ann)}</span></span>`)}</div>
+    <div class="lab">${m}월 배당 <span class="mo">${state.netMode ? "세후" : "세전"}</span></div>
+    <div class="val mono">${won(md.total)}<span class="unit">원</span></div>
+    <div class="hmeter" role="img" aria-label="받음 ${got.toFixed(0)}%"><i style="width:${got.toFixed(1)}%"></i></div>
+    <div class="base">받음 <b class="mono recv">${won(md.fixed)}원</b> · 남은 예상 <b class="mono">${won(md.est)}원</b></div>
     ${subRows([
-      ["받은 배당", `<span class="recv">+${won(gotAll)}</span>` +
-        (md.fixed > 0 ? ` <span class="mo">(${m}월 +${won(md.fixed)})</span>` : "")],
-      ["팔아서 남긴 것", signedWon(tradePnl)],
-      ["아직 안 판 평가손익", signedWon(valPnl)],
+      [rate === null ? "총 수익" : `총 수익 <span class="mo">${compact(f.invested)} 대비</span>`, signedWon(overall) +
+        (rate === null ? ` <span class="mo">(${invLabel} 미상)</span>` : ` <span class="mo">${signedPct(rate)}</span>`)],
+      ann === null ? null : ["연환산 수익률", `<span class="${pnlCls(ann)}">${signedPct(ann)}</span>`],
+      ["누적 배당", `<span class="recv">+${won(gotAll)}</span>`],
+      ["매도 손익", signedWon(tradePnl)],
+      ["평가손익", signedWon(valPnl)],
     ])}`;
+}
+
+/* 30일 안의 지급 예정. 같은 ETF라도 계좌가 다르면 들어오는 돈이 따로라 묶지 않는다(달력과 같은 기준).
+   수령 기록이 있는 회차는 이미 들어온 돈이라 뺀다 — periodDividend 와 같은 대체 규칙 */
+function renderUpcoming(){
+  const y = TODAY.getFullYear();
+  const end = new Date(TODAY); end.setDate(end.getDate() + 30);
+  const done = recIndex();
+  const rows = allPayments([y - 1, y, y + 1])
+    .filter(p => p.krw > 0 && p.pay >= TODAY && p.pay <= end && !done.has(p.h.id + "|" + iso(p.pay).slice(0, 7)))
+    .sort((a, b) => a.pay - b.pay);
+  const sum = rows.reduce((s, p) => s + p.krw, 0);
+  document.getElementById("upCount").textContent = rows.length ? `30일 ${rows.length}건, ${won(sum)}원` : "";
+  const el = document.getElementById("upList");
+  if(!rows.length){
+    el.innerHTML = `<div class="empty slim">30일 안에 들어올 배당이 없습니다.</div>`;
+    return;
+  }
+  el.innerHTML = rows.slice(0, 3).map(p => {
+    const dd = Math.round((p.pay - TODAY) / 864e5);
+    return `<div class="up-row">
+      <div class="up-d"><b>${p.pay.getMonth() + 1}/${String(p.pay.getDate()).padStart(2, "0")}</b>
+        <span>${dd === 0 ? "오늘" : "D-" + dd}</span></div>
+      <div class="nm">${accDot(p.h.account)}${esc(shortOf(p.h))}</div>
+      <div class="am"><b class="recv">${won(p.krw)}원</b><span>${p.fixed ? "확정" : "추정"}</span></div>
+    </div>`;
+  }).join("") + (rows.length > 3 ? `<div class="up-rest">외 ${rows.length - 3}건</div>` : "");
 }
 
 /* 홈에서 걷어낸 카드 셋 — 탭이 같은 내용을 이미 담당한다.
@@ -2262,16 +2322,24 @@ function renderHero(){
    연금 납입 한도: 더보기 탭의 납입 기록 패널이 같은 한도 카드를 회차 안내까지 달아 세운다. */
 
 /* ---------- render: 홈 월별 흐름 막대 ----------
-   히어로의 '올해 배당'을 12칸으로 쪼갠 그래프. 수치는 monthlyTotals 가 월별 배당 표와 공유한다.
-   금액 라벨은 최댓값 달과 이번 달만 붙인다 — 12칸에 다 붙이면 라벨이 그래프를 덮는다.
-   라벨이 없는 칸도 자리는 비워 둔다. 어떤 칸만 라벨 높이를 먹으면 그 칸 막대가 짧아져 비교가 깨진다 */
+   올해 배당을 12칸으로 쪼갠 그래프. 수치는 monthlyTotals 가 월별 배당 표와 공유한다 */
+/* 막대 아래 금액 — 칸이 24px 라 compact 의 '15.6만'(약 30px)은 이웃과 겹친다.
+   10만 이상은 정수 만, 그 아래는 소수 한 자리 만·천 단위로 줄여 3~4글자에 맞춘다. 정확한 값은 읽기 줄이 맡는다 */
+function tiny(v){
+  if(v <= 0) return "";
+  if(state.blind) return "•";
+  if(v >= 100000) return Math.round(v / 10000) + "만";
+  if(v >= 10000) return (v / 10000).toFixed(1).replace(/\.0$/, "") + "만";
+  if(v >= 1000) return Math.round(v / 1000) + "천";
+  return won(v);
+}
+// 막대에서 고른 달 — 다시 그려도 유지하려고 렌더 밖에 둔다
+let flowPick = TODAY.getMonth();
 function renderHomeChart(){
   const { y, perMonth, accMonth } = monthlyTotals();
   const total = perMonth.reduce((a,b) => a+b, 0);
-  const note = document.getElementById("flowNote");
   const el = document.getElementById("flowGraph");
 
-  note.textContent = total > 0 ? `(${y}년 · ${state.netMode ? "세후" : "세전"})` : "";
   if(total <= 0){
     el.innerHTML = `<div class="empty">표시할 배당 일정이 없습니다.</div>`;
     return;
@@ -2279,45 +2347,41 @@ function renderHomeChart(){
 
   const cur = TODAY.getMonth();
   const max = Math.max(...perMonth);
-  const maxIdx = perMonth.indexOf(max);
   const accs = ACC_ORDER.filter(k => accMonth[k].some(v => v > 0));
 
-  /* 막대 길이와 조각 비율을 인라인 style 이 아니라 CSS 변수로 넘긴다. 그래야 세로(넓은 화면)와
-     가로(폰) 방향을 CSS 만으로 뒤집을 수 있다 — height 로 박아 넣으면 폭으로 다시 읽을 수 없다 */
+  // 막대 길이와 조각 비율은 CSS 변수로 넘긴다 — 방향·크기를 CSS 가 정한다
   const cols = perMonth.map((v, i) => {
     const segs = v > 0 ? accs.map(k => accMonth[k][i] > 0
       ? `<div class="seg ${k}" style="--s:${((accMonth[k][i] / v) * 100).toFixed(2)}"></div>` : "").join("") : "";
     const tip = `${MONTH_LABELS[i]} ${won(v)}원` +
       accs.filter(k => accMonth[k][i] > 0).map(k => ` · ${ACCOUNTS[k]} ${won(accMonth[k][i])}`).join("");
-    // 넓은 화면은 12칸이 좁아 최댓값·이번 달만 라벨을 남긴다. 폰은 가로라 모든 행에 자리가 있다
-    const key = (i === maxIdx || i === cur) && v > 0;
-    // --v 는 칸에 둔다 — 막대 높이와 그 머리에 붙는 금액 라벨이 같은 값을 읽어야 한다
-    return `<div class="col${i > cur ? " est" : ""}${i === cur ? " now" : ""}"` +
+    return `<div class="col${i > cur ? " est" : ""}${i === cur ? " now" : ""}${i === flowPick ? " pick" : ""}" data-i="${i}"` +
       ` style="--v:${v > 0 ? Math.max(3, (v / max) * 100).toFixed(1) : 2}" title="${esc(tip)}">
-      <div class="plot">
-        <div class="bar${v > 0 ? "" : " zero"}">` +
-        // 라벨을 조각보다 앞에 둔다 — absolute 라 위치는 그대로이고, 맨 위 조각을 :last-child 로 집을 수 있다
-        `<div class="amt"${key ? ` data-key="1"` : ""}>${v > 0 ? compact(v) : ""}</div>${segs}</div>
-      </div>
+      <div class="plot"><div class="bar${v > 0 ? "" : " zero"}">${segs}</div></div>
       <div class="mlab">${MONTH_LABELS[i].replace("월", "")}</div>
+      <div class="vlab">${tiny(v)}</div>
     </div>`;
   }).join("");
 
   const yd = periodDividend(y);
   const unknown = filtered().filter(needsInput).length;
+  const pi = flowPick;
+  const pickAcc = accs.filter(k => accMonth[k][pi] > 0)
+    .map(k => `<span><i class="dot ${k}"></i>${ACCOUNTS[k]} <b class="mono">${won(accMonth[k][pi])}원</b></span>`).join("");
+  /* 고른 달 읽기는 막대 바로 아래 둔다 — 짚은 칸과 그 금액이 한눈에 이어진다.
+     달·계좌·연 요약이 같은 '라벨 + 금액' 줄이라 셋 다 .legend 한 형식으로 쓴다 */
   el.innerHTML = `
-    <div class="legend">${accs.map(k =>
-      `<span><i class="dot ${k}"></i>${ACCOUNTS[k]} <b class="mono">${won(accMonth[k].reduce((a,b) => a+b, 0))}원</b></span>`).join("")}
-      <span style="color:var(--tx3)">옅은 막대는 아직 안 들어온 예상분</span>
-    </div>
     <div class="flow">${cols}</div>
-    <div class="legend flow-sum">
-      <span>확정 ${yd.count}건 <b class="mono recv">${won(yd.fixed)}원</b></span>
+    <div class="legend flow-read"><span>${MONTH_LABELS[pi]}${
+      pi > cur ? ` <i class="mo">예상</i>` : ""} <b class="mono">${won(perMonth[pi])}원</b></span></div>
+    <div class="legend flow-row">${pickAcc}</div>
+    <div class="legend flow-row">
+      <span>확정 <b class="mono recv">${won(yd.fixed)}원</b></span>
       <span>남은 예상 <b class="mono">${won(yd.est)}원</b></span>
       <span>연 <b class="mono">${won(yd.total)}원</b></span>
-      <span>월평균 <b class="mono">${won(yd.total / 12)}원</b></span>
       ${unknown > 0 ? `<span class="tag w">⚠ 분배금 미확인 ${unknown}종목</span>` : ""}
     </div>`;
+  el.querySelectorAll(".flow .col").forEach(c => c.onclick = () => { flowPick = +c.dataset.i; renderHomeChart(); });
 }
 
 /* ---------- render: 금융소득 한도 ---------- */
@@ -2451,6 +2515,10 @@ function renderCalFixed(){
 
   // 0건이어도 섹션은 남긴다 — 패널이 통째로 사라지면 확정이 없는 것인지 기능이 없는 것인지 갈리지 않는다
   document.getElementById("calFixCount").textContent = rows.length ? rows.length + "건" : "";
+  /* 0건이면 달력 아래로 내린다 — 빈 안내가 탭 맨 위를 차지하면 본체인 달력이 밀린다.
+     있으면 위로 올린다: 달과 무관하게 확정분을 먼저 보여 주는 것이 이 패널의 존재 이유다 */
+  const fp = document.getElementById("calFixPanel"), pane = document.getElementById("pane-cal");
+  if(rows.length === 0) pane.appendChild(fp); else pane.prepend(fp);
   if(rows.length === 0){
     document.getElementById("calFixList").innerHTML =
       `<div class="empty slim">아직 공시로 확정된 회차가 없습니다.</div>`;
@@ -2563,7 +2631,8 @@ function renderCalendar(){
       if(rest.length){
         const restSum = rest.reduce((s,e) => s + (e.type === "got" ? recNetKrw(e.r) : e.type === "pay" ? e.p.krw : 0), 0);
         const names = rest.map(e => e.type === "got" ? recName(e.r) : e.p.h.name).join(" / ");
-        body += `<div class="ev more" title="${esc(names)}">+${rest.length}건${restSum ? " · " + won(restSum) + "원" : ""}</div>`;
+        // .mx 는 폰 격자에서 숨겨 '+N'만 남긴다
+        body += `<div class="ev more" title="${esc(names)}">+${rest.length}<span class="mx">건${restSum ? " · " + won(restSum) + "원" : ""}</span></div>`;
       }
       const tdCls = [isToday ? "today" : "", (c === 0 || c === 6) ? "we" : "", d === calSel ? "sel" : ""]
         .filter(Boolean).join(" ");
@@ -2655,34 +2724,42 @@ function monthlyTotals(panel){
 /* 폰용 월별 목록. 12개월 × 종목 교차표는 min-width 가 1314px 라 폰에서는 횡스크롤 말고는
    길이 없고, 그러면 종목 이름과 월이 같은 화면에 남지 않아 표를 읽는 목적 자체가 사라진다.
    축을 뒤집어 '월 → 그 달의 종목별 금액'으로 세운다 — 값이 있는 달만 낸다 */
-function renderMonthList(perMonth, matrix){
+function renderMonthList(perMonth, accMonth, matrix){
   const el = document.getElementById("monthList");
   const cur = TODAY.getMonth();
-  const groups = perMonth.map((v, i) => {
-    if(v <= 0) return "";
-    const items = matrix.filter(r => r.arr[i] > 0).sort((a, b) => b.arr[i] - a.arr[i]);
-    return `<div class="mgroup${i === cur ? " now" : ""}">
-      <div class="mhead"><span>${MONTH_LABELS[i]}${i > cur ? ` <i class="est">예상</i>` : ""}</span>
-        <b class="mono">${won(v)}원</b></div>
-      ${subRows(items.map(r => [
+  // 최근 달이 먼저 궁금하므로 거꾸로 세우고, 석 달 넘는 지난 달들은 '더 보기' 뒤로 접는다
+  const months = perMonth.map((v, i) => i).filter(i => perMonth[i] > 0).reverse();
+  const sl = sliceRows("monthList", months, 3);
+  const rowsOf = i => state.monthView === "detail"
+    ? matrix.filter(r => r.arr[i] > 0).sort((a, b) => b.arr[i] - a.arr[i]).map(r => [
         `<i class="dot ${r.h.account}"></i>${esc(r.gone ? r.h.short : shortOf(r.h))}${r.gone ? " (청산)" : ""}`,
         `${won(r.arr[i])}원`,
-      ]))}
-    </div>`;
-  }).join("");
-  el.innerHTML = groups || `<div class="empty">표시할 배당 일정이 없습니다.</div>`;
+      ])
+    : ACC_ORDER.filter(k => accMonth[k][i] > 0).map(k =>
+        [`<i class="dot ${k}"></i>${ACCOUNTS[k]}`, `${won(accMonth[k][i])}원`]);
+  const groups = sl.list.map(i => `<div class="mgroup${i === cur ? " now" : ""}">
+      <div class="mhead"><span>${MONTH_LABELS[i]}${i > cur ? ` <i class="est">예상</i>` : ""}</span>
+        <b class="mono">${won(perMonth[i])}원</b></div>
+      ${subRows(rowsOf(i))}
+    </div>`).join("");
+  el.innerHTML = groups ? groups + rMore("monthList", sl) : `<div class="empty">표시할 배당 일정이 없습니다.</div>`;
+  bindMore(el);
 }
 
 function renderMonthly(){
-  const { y, perMonth, matrix } = monthlyTotals("monthly");
-  renderMonthList(perMonth, matrix);
+  document.querySelectorAll("#monthTabs button").forEach(b => {
+    b.classList.toggle("on", b.dataset.mv === state.monthView);
+    b.onclick = () => { state.monthView = b.dataset.mv; save(); renderMonthly(); };
+  });
+  const { y, perMonth, accMonth, matrix } = monthlyTotals("monthly");
+  renderMonthList(perMonth, accMonth, matrix);
   if(matrix.length === 0){
     document.getElementById("barYear").textContent = `(${y}년 지급 기준)`;
     return;
   }
   const grandTotal = perMonth.reduce((a,b) => a+b, 0);
   document.getElementById("barYear").textContent =
-    `(${y}년 지급 기준 · 확정 + 예상 · 월평균 ${won(grandTotal / 12)}원)`;
+    `(${y}년, 월평균 ${won(grandTotal / 12)}원)`;
 }
 /* ---------- render: holdings ---------- */
 // 정렬 기준으로만 쓴다 — 화면에 나오는 배당률은 요약 줄이 따로 만든다
@@ -2727,9 +2804,9 @@ function donutSvg(parts, total, cap, aria, opts = {}){
     `<span title="${esc(p.name)}"${data(p)}><i class="dot ${p.cls}"></i><em>${esc(p.name)}</em>` +
     `<b>${compact(p.v)}</b> <i>${(p.v / total * 100).toFixed(1)}%</i></span>`).join("");
   const sideBox = side
-    ? `<div class="donut-side"><span class="ds-h"${data(side)}><i class="dot ${side.cls}"></i>` +
-      `<em>${esc(side.name)}</em></span>` +
-      `${opts.sideRows || ""}</div>`
+    ? `<div class="donut-side">${opts.sideTop ? `<div class="ds-g">${opts.sideTop}</div>` : ""}` +
+      `<div class="ds-g"><span class="ds-h"${data(side)}><i class="dot ${side.cls}"></i>` +
+      `<em>${esc(side.name)}</em></span>${opts.sideRows || ""}</div></div>`
     : "";
   return `<div class="donut${side ? " donut-wide" : ""}" data-total="${compact(total)}" data-cap="${esc(cap)}">
     <svg viewBox="0 0 100 100" width="160" height="160" role="img" aria-label="${esc(aria || cap)}">
@@ -2874,17 +2951,26 @@ function renderAssetMix(){
     return;
   }
   /* 계좌별은 조각으로 쪼개지 않는다 — 종목 색(파랑 램프)과 계좌 3색이 한 원에서 뒤섞인다.
-     대신 예수금 블록 안에 계좌 순서대로 세운다. 보유 목록과 같은 순서라 눈이 따라간다 */
+     대신 원 옆에 계좌 순서대로 세운다. 보유 목록과 같은 순서라 눈이 따라간다 */
   // 계좌 점은 자산 탭의 계좌 도넛·월별 막대와 같은 3색이다 — 같은 계좌를 색으로 따라가게 한다
-  const sideRows = list.filter(x => x.v > 0).map(x =>
-    `<span class="ds-r"><i class="dot ${x.a}"></i><em>${ACCOUNTS[x.a]}</em>` +
-    `<b>${compact(x.v)}</b></span>`).join("");
+  // 두 묶음을 원 옆에 나란히 세우므로 폰 폭에 들어가는 상단 탭의 줄임 이름을 쓴다
+  const row = (a, v) => `<span class="ds-r"><i class="dot ${a}"></i><em>${ACC_SHORT[a]}</em>` +
+    `<b>${v < 0 ? "−" : ""}${compact(Math.abs(v))}</b></span>`;
+  // 계좌 자산은 원과 같은 기준(평가 + 양수 예수금)이라 세 줄을 더하면 가운데 총액이 된다
+  const hs = filtered();
+  const assets = ACC_ORDER.map(a => {
+    const c = list.find(x => x.a === a);
+    return { a, v: hs.filter(h => h.account === a).reduce((s, h) => s + valueKrw(h), 0) + (c && c.v > 0 ? c.v : 0) };
+  }).filter(x => x.v > 0);
+  const sideTop = `<span class="ds-t">계좌별 자산</span>` + assets.map(x => row(x.a, x.v)).join("");
+  // 음수 계좌도 줄에는 세운다 — 빠지면 그 계좌가 없는 것인지 빗나간 것인지 구분되지 않는다
+  const sideRows = list.map(x => row(x.a, x.v)).join("");
   const note = [
     !f.known ? "납입·매수 기록이 없어 예수금을 알 수 없습니다" : "",
-    negs.length ? `${negs.map(x => `${ACCOUNTS[x.a]} ${won(x.v)}원`).join(" · ")}은 음수라 제외 (계좌 밖에서 들어온 돈이 기록되지 않은 것)` : "",
+    negs.length ? `${negs.map(x => ACCOUNTS[x.a]).join(" · ")} 예수금은 음수라 원에서 제외 (계좌 밖에서 들어온 돈이 기록되지 않은 것)` : "",
   ].filter(Boolean).join(" · ");
 
-  el.innerHTML = donutSvg(parts, total, "자산", "자산 구성", { side: "cash", sideRows })
+  el.innerHTML = donutSvg(parts, total, "자산", "자산 구성", { side: "cash", sideTop, sideRows })
     + (note ? `<div class="note">${note}</div>` : "");
   bindDonut(el);
 }
@@ -2921,9 +3007,9 @@ function renderHoldings(){
       name: accDot(h.account) + esc(dispName(h)),
       edit: { kind: "hold", id: h.id },
       val: amtOf(h, v, valueLocal(h)),
+      // 현재가는 뺀다 — 평가금액 ÷ 수량이라 같은 사실이 두 번 서고, 한 줄에 값이 셋이면 이름보다 무거워진다
       sub: [`${h.shares}주`,
-            h.avgPrice ? `평단 ${localAmt(h.avgPrice, h.market)}` : null,
-            h.price ? `현재가 ${localAmt(h.price, h.market)}` : null].filter(Boolean).join(" · "),
+            h.avgPrice ? `평단 ${localAmt(h.avgPrice, h.market)}` : null].filter(Boolean).join(" · "),
       // 손익은 평가금액에 딸린 값이라 맥락 줄 오른쪽에 둔다 — 주 금액 바로 아래가 그 자리다
       subVal: diffText,
       subValCls: diff === null ? "" : pnlCls(diff),
@@ -2933,9 +3019,9 @@ function renderHoldings(){
     });
   }), "", "hold", sl);
   sm.innerHTML = `
-    <span>평가금액 <b class="mono">${won(totalValue)}원</b></span>
-    <span>월 예상 배당 <b class="mono recv">${won(totalAnnual/12)}원</b></span>
-    <span>배당률 <b class="mono rate">${totalValue > 0 ? pct(totalAnnual/totalValue) : "-"}</b></span>`;
+    <span class="st"><em>평가금액</em><b class="mono">${won(totalValue)}원</b></span>
+    <span class="st"><em>월 배당</em><b class="mono recv">${won(totalAnnual/12)}원</b></span>
+    <span class="st"><em>배당률</em><b class="mono rate">${totalValue > 0 ? pct(totalAnnual/totalValue) : "-"}</b></span>`;
 }
 
 /* ---------- 자산: 종목별 전일 대비 ----------
@@ -3210,16 +3296,19 @@ function meter(used, limit){
   return `<div class="meter"><i class="${r > 1 ? "over" : ""}" style="width:${w}%"></i></div>`;
 }
 
-function limitCard(name, used, limit, left, extra){
+// 비율은 막대 끝에 붙인다 — 막대가 그리는 값이라 금액 줄 맨 앞에 두면 첫 금액처럼 읽힌다.
+// foot 은 남음 줄과 성격이 다른 부가 금액(공제액)이라 한 줄 내려 따로 세운다
+function limitCard(name, used, limit, left, extra, foot){
   const r = limit > 0 ? used / limit : 0;
   return `<div class="limit">
     <div class="hd"><span class="nm2">${name}</span><span class="rt"><b>${won(used)}</b> / ${won(limit)}원</span></div>
-    ${meter(used, limit)}
+    <div class="mrow">${meter(used, limit)}<span class="mp">${(r*100).toFixed(0)}%</span></div>
     <div class="nums">
-      <span>${(r*100).toFixed(0)}%${r > 1 ? " · 한도 초과" : ""}</span>
+      ${r > 1 ? `<span>한도 초과</span>` : ""}
       <span>남음 <b class="${left > 0 ? "" : "recv"}">${won(left)}원</b></span>
       ${extra || ""}
     </div>
+    ${foot ? `<div class="nums">${foot}</div>` : ""}
   </div>`;
 }
 
@@ -3233,7 +3322,7 @@ function renderContrib(){
       timesNote(s.pension, LIMIT_PENSION, s.pensionUnit)) +
     limitCard("IRP (자체 목표)", s.irp, s.irpRoom, s.irpLeft,
       timesNote(s.irp, s.irpRoom, s.irpUnit)) +
-    limitCard("합산 공제 대상", s.counted, LIMIT_TOTAL, s.totalLeft,
+    limitCard("합산 공제 대상", s.counted, LIMIT_TOTAL, s.totalLeft, "",
       DEDUCT_RATE.map(([label, rate]) =>
         `<span>${label} <b>${won(s.counted * rate)}원</b></span>`).join(""));
 
@@ -3462,7 +3551,7 @@ function renderAll(){
   // 데이터가 아예 없을 때만 안내를 띄운다 — 계좌 필터로 0건이 된 상태와 구분해야 하므로 state 를 직접 본다
   document.getElementById("firstRun").hidden =
     state.holdings.length > 0 || state.records.length > 0 || state.purchases.length > 0;
-  renderTabs(); renderHero(); renderHomeChart(); renderIndices(); renderAssetMix();
+  renderTabs(); renderHero(); renderUpcoming(); renderHomeChart(); renderIndices(); renderAssetMix();
   renderLimit(); renderCalendar(); renderCalFixed(); renderMonthly();
   renderHoldings(); renderHoldChange(); renderRecords(); renderContrib();
   renderTradeTabs(); renderBuys(); renderTrades();
@@ -3506,7 +3595,7 @@ function openModal(id){
   document.getElementById("modalTitle").textContent = h ? "종목 수정" : "종목 추가";
   document.getElementById("delBtn").style.display = h ? "" : "none";
 
-  document.getElementById("f_account").value = h ? h.account : (state.account === "all" ? "normal" : state.account);
+  renderAccPick("f", h ? h.account : defaultAcc("normal"));
   document.getElementById("f_market").value = h ? h.market : "KR";
   document.getElementById("f_name").value = h ? h.name : "";
   document.getElementById("f_ticker").value = h ? (h.ticker || "") : "";
@@ -3541,7 +3630,7 @@ document.getElementById("form").onsubmit = e => {
   const taxVal = taxInput === "" ? null : Math.min(100, Math.max(0, parseFloat(taxInput)));
   const data = {
     id: editId || ("h" + Date.now() + Math.floor(Math.random()*1000)),
-    account: document.getElementById("f_account").value,
+    account: modalAcc.f,
     market: document.getElementById("f_market").value,
     name: document.getElementById("f_name").value.trim(),
     ticker: document.getElementById("f_ticker").value.trim(),
@@ -3595,12 +3684,33 @@ const PICKERS = {
 };
 function $id(id){ return document.getElementById(id); }
 
+/* 모달의 계좌 입력은 이 탭 하나로 둔다 — 종목 목록을 이 계좌로 거르는데
+   직접 입력용 계좌 select 가 따로 있으면 두 값이 어긋난 기록이 저장된다 */
+const modalAcc = {};
+function defaultAcc(fallback){ return state.account === "all" ? fallback : state.account; }
+function renderAccPick(prefix, account, onPick){
+  modalAcc[prefix] = account;
+  const box = $id(prefix + "_acc");
+  box.innerHTML = ACC_ORDER.map(a =>
+    `<button type="button" data-a="${a}" class="${a === account ? "on" : ""}">${accDot(a)}${ACCOUNTS[a]}</button>`).join("");
+  box.querySelectorAll("button").forEach(b => b.onclick = () => {
+    renderAccPick(prefix, b.dataset.a, onPick);
+    if(onPick) onPick();
+  });
+}
+// 기록의 계좌는 저장 시점 값이다. 그 뒤 종목의 계좌를 옮겼으면 목록에서 종목이 빠지므로 종목 쪽을 따른다
+function renderHoldingAccPick(prefix, account, selected){
+  const h = state.holdings.find(x => x.id === selected);
+  renderAccPick(prefix, h ? h.account : account, () => { fillHoldingSelect(prefix); onPickChange(prefix, true); });
+  fillHoldingSelect(prefix, selected);
+}
+
 function fillHoldingSelect(prefix, selected){
   const sel = $id(prefix + "_holding");
-  sel.innerHTML = state.holdings
-    .map(h => `<option value="${h.id}">[${ACCOUNTS[h.account]}] ${esc(h.name)}</option>`).join("")
+  const list = state.holdings.filter(h => h.account === modalAcc[prefix]);
+  sel.innerHTML = list.map(h => `<option value="${h.id}">${esc(h.name)}</option>`).join("")
     + `<option value="__manual__">${PICKERS[prefix].manual}</option>`;
-  sel.value = selected || (state.holdings[0] ? state.holdings[0].id : "__manual__");
+  sel.value = selected || (list[0] ? list[0].id : "__manual__");
 }
 function pickMarket(prefix){
   const v = $id(prefix + "_holding").value;
@@ -3627,10 +3737,9 @@ function openRecModal(id){
   const r = id ? state.records.find(x => x.id === id) : null;
   document.getElementById("recModalTitle").textContent = r ? "수령 기록 수정" : "수령 기록 추가";
   document.getElementById("recDelBtn").style.display = r ? "" : "none";
-  fillHoldingSelect("r", r ? (r.holdingId || "__manual__") : null);
+  renderHoldingAccPick("r", r ? r.account : defaultAcc("normal"), r ? (r.holdingId || "__manual__") : null);
   document.getElementById("r_date").value = r ? r.date : iso(TODAY);
   document.getElementById("r_name").value = r ? (r.name || "") : "";
-  document.getElementById("r_account").value = r ? r.account : (state.account === "all" ? "normal" : state.account);
   document.getElementById("r_market").value = r ? r.market : "KR";
   document.getElementById("r_shares").value = r ? r.shares : "";
   document.getElementById("r_perShare").value = r ? r.perShare : "";
@@ -3656,7 +3765,7 @@ document.getElementById("recForm").onsubmit = e => {
     id: recEditId || ("r" + Date.now() + Math.floor(Math.random()*1000)),
     holdingId: manual ? null : v,
     name,
-    account: manual ? document.getElementById("r_account").value : h.account,
+    account: manual ? modalAcc.r : h.account,
     market: manual ? document.getElementById("r_market").value : h.market,
     date: document.getElementById("r_date").value,
     shares: numv("r_shares"),
@@ -3694,7 +3803,7 @@ function openCModal(id){
   const c = id ? state.contributions.find(x => x.id === id) : null;
   document.getElementById("cTitle").textContent = c ? "납입 기록 수정" : "납입 기록 추가";
   document.getElementById("cDelBtn").style.display = c ? "" : "none";
-  document.getElementById("c_account").value = c ? c.account : (state.account === "all" ? "pension" : state.account);
+  renderAccPick("c", c ? c.account : defaultAcc("pension"));
   document.getElementById("c_date").value = c ? c.date : iso(TODAY);
   document.getElementById("c_amount").value = c ? c.amount : "";
   document.getElementById("c_memo").value = c ? (c.memo || "") : "";
@@ -3710,7 +3819,7 @@ document.getElementById("cForm").onsubmit = e => {
   if(!(amount > 0)){ alert("금액을 입력하세요."); return; }
   const data = {
     id: cEditId || ("c" + Date.now() + Math.floor(Math.random()*1000)),
-    account: document.getElementById("c_account").value,
+    account: modalAcc.c,
     date: document.getElementById("c_date").value,
     amount,
     memo: document.getElementById("c_memo").value.trim()
@@ -3747,10 +3856,9 @@ function openTModal(id){
   const t = id ? state.trades.find(x => x.id === id) : null;
   document.getElementById("tTitle").textContent = t ? "매도 기록 수정" : "매도 기록 추가";
   document.getElementById("tDelBtn").style.display = t ? "" : "none";
-  fillHoldingSelect("t", t ? (t.holdingId || "__manual__") : null);
+  renderHoldingAccPick("t", t ? t.account : defaultAcc("normal"), t ? (t.holdingId || "__manual__") : null);
   document.getElementById("t_date").value = t ? t.date : iso(TODAY);
   document.getElementById("t_name").value = t ? (t.name || "") : "";
-  document.getElementById("t_account").value = t ? t.account : "normal";
   document.getElementById("t_market").value = t ? t.market : "KR";
   document.getElementById("t_shares").value = t ? t.shares : "";
   document.getElementById("t_price").value = t ? t.sellPrice : "";
@@ -3780,7 +3888,7 @@ document.getElementById("tForm").onsubmit = e => {
     id: tEditId || ("t" + Date.now() + Math.floor(Math.random()*1000)),
     holdingId: manual ? null : v,
     name,
-    account: manual ? document.getElementById("t_account").value : h.account,
+    account: manual ? modalAcc.t : h.account,
     market: manual ? document.getElementById("t_market").value : h.market,
     date: document.getElementById("t_date").value,
     shares: direct ? 0 : numv("t_shares"),
@@ -3818,10 +3926,9 @@ function openBModal(id){
   const p = id ? state.purchases.find(x => x.id === id) : null;
   document.getElementById("bTitle").textContent = p ? "매수 기록 수정" : "매수 기록 추가";
   document.getElementById("bDelBtn").style.display = p ? "" : "none";
-  fillHoldingSelect("b", p ? (p.holdingId || "__manual__") : null);
+  renderHoldingAccPick("b", p ? p.account : defaultAcc("normal"), p ? (p.holdingId || "__manual__") : null);
   document.getElementById("b_date").value = p ? p.date : iso(TODAY);
   document.getElementById("b_name").value = p ? (p.name || "") : "";
-  document.getElementById("b_account").value = p ? p.account : "normal";
   document.getElementById("b_market").value = p ? p.market : "KR";
   document.getElementById("b_shares").value = p ? p.shares : "";
   document.getElementById("b_price").value = p ? p.price : "";
@@ -3846,7 +3953,7 @@ document.getElementById("bForm").onsubmit = e => {
     id: bEditId || ("p" + Date.now() + Math.floor(Math.random()*1000)),
     holdingId: manual ? null : v,
     name,
-    account: manual ? document.getElementById("b_account").value : h.account,
+    account: manual ? modalAcc.b : h.account,
     market: manual ? document.getElementById("b_market").value : h.market,
     date: document.getElementById("b_date").value,
     shares: numv("b_shares"),
@@ -4242,6 +4349,7 @@ async function fetchFx(){
   }
 }
 document.getElementById("fxNote").onclick = fetchFx;
+document.getElementById("upMore").onclick = () => setTab("cal");
 
 /* ---------- init ---------- */
 buildMonthChecks();
