@@ -137,6 +137,9 @@ h2{font-size:15px; margin:0 0 12px; color:var(--tx); font-weight:650; letter-spa
 #syncBtn svg{margin:0}
 #syncBtn[disabled]{opacity:.6; cursor:default}
 #syncBtn.busy svg{animation:spin 1s linear infinite}
+/* 아직 저장소에 들어가지 않은 편집 수 — 이 숫자가 남아 있으면 다른 기기에는 없다 */
+#queueCount{font-size:11px; margin-left:4px; font-variant-numeric:tabular-nums}
+#queueCount[hidden]{display:none}
 @keyframes spin{to{transform:rotate(360deg)}}
 /* 진행·실패를 여기서 알린다 — 설정 화면의 문구는 다른 탭에 있으면 보이지 않는다 */
 #syncNote{flex:1 0 100%; font-size:11px; color:var(--head-tx3); padding-bottom:6px}
@@ -824,7 +827,7 @@ details.fold > #dataStatus{margin-top:10px}
   <div id="filterbar">
     <div class="tabs" id="accTabs"></div>
     <button class="btn" id="syncBtn" title="지금 갱신" aria-label="지금 갱신">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4V1L8 5l4 4V6a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8"/></svg></button>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4V1L8 5l4 4V6a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8"/></svg><span id="queueCount" hidden></span></button>
     <span id="syncNote" hidden></span>
   </div>
 
@@ -1479,6 +1482,8 @@ const KEY = "dividend-tracker-v1";
 const EDIT_KEY = KEY + ":edited";
 // 저장소·토큰은 자산 데이터가 아니라 이 기기의 연결 설정이다. 내보낸 JSON 에 섞이면 안 된다
 const PULL_KEY = KEY + ":pull";
+// 저장소에 아직 들어가지 않은 매수·납입·매도 편집. 연결 설정과 같이 기기에만 둔다
+const OPS_KEY = KEY + ":ops";
 const ACCOUNTS = { irp:"IRP", pension:"연금저축", normal:"일반" };
 // 표시 순서는 ACCOUNTS 선언 순(IRP 우선)과 달리 일반 → 연금저축 → IRP로 고정한다
 const ACC_ORDER = ["normal", "pension", "irp"];
@@ -1601,7 +1606,8 @@ function load(){
   // 수령 기록 밖의 편집은 병합되지 않아, 묻지 않고 갈아타면 잃은 줄도 모른다
   if(useSeed && stored && localStorage.getItem(EDIT_KEY)
     && !confirm("앱에서 고친 종목·납입·매도·매수 기록이 있습니다.\n새 데이터로 덮어쓸까요? 수령 기록은 유지됩니다.")) useSeed = false;
-  const d = useSeed ? withLocalRecords(seed, stored && stored.records) : stored;
+  if(useSeed) ackEdits(seed);
+  const d = useSeed ? withLocalEdits(withLocalRecords(seed, stored && stored.records)) : stored;
   if(!d) return;
   apply(d);
   if(useSeed){
@@ -1627,6 +1633,98 @@ function withLocalRecords(d, local){
     else if(out[i].est && !r.est) out[i] = r;
   }
   return Object.assign({}, d, { records: out });
+}
+
+/* ---------- 편집 큐 ----------
+   매수·납입·매도는 받은 데이터가 통째로 덮으므로, 고친 것을 op 로 쌓았다가 갱신 버튼이
+   러너에 실어 보낸다. 러너가 데이터의 editLog 에 nonce 를 남긴 것을 받아 본 뒤에만 지운다 —
+   실행이 성공해도 push 가 밀렸으면 저장소에는 없다 */
+function loadQueue(){
+  try{
+    const q = JSON.parse(localStorage.getItem(OPS_KEY) || "null");
+    if(q && Array.isArray(q.ops)) return { ops: q.ops, sent: Array.isArray(q.sent) ? q.sent : [] };
+  }catch(e){}
+  return { ops: [], sent: [] };
+}
+function saveQueue(q){
+  if(q.ops.length || q.sent.length) localStorage.setItem(OPS_KEY, JSON.stringify(q));
+  else localStorage.removeItem(OPS_KEY);
+}
+const opKey = op => (op.op === "hold" ? "holdings" : op.col) + "|" + op.id;
+
+// 키움 잔고가 덮는 계좌의 수량은 보내 봐야 다음 PC 실행에서 되돌아간다
+function linkedAccounts(brokers){
+  return new Set(Object.values(brokers || {}).flatMap(b => b.accounts || []));
+}
+function holdOp(holdingId){
+  const h = state.holdings.find(x => x.id === holdingId);
+  if(!h || linkedAccounts(state.brokers).has(h.account)) return null;
+  return { op:"hold", id:h.id, shares:h.shares || 0, avgPrice:h.avgPrice || 0 };
+}
+
+/* 연결 설정이 없는 기기는 보낼 길이 없으므로 큐를 쓰지 않고 기존 편집 표식으로 보호한다.
+   rev 는 보낸 뒤 다시 고친 op 를 이전 전송의 확인으로 지우지 않기 위한 표식이다 */
+function commitEdits(ops){
+  const cfg = pullCfg();
+  ops = ops.filter(Boolean);
+  if(!cfg.repo || !cfg.token || !ops.length){ save(true); return; }
+  const q = loadQueue();
+  for(const op of ops){
+    op.rev = Date.now() + "-" + Math.random().toString(36).slice(2, 6);
+    q.ops = q.ops.filter(o => opKey(o) !== opKey(op));
+    q.ops.push(op);
+  }
+  saveQueue(q);
+  save();
+  renderQueueNote();
+}
+
+// update.py apply_edits 와 규칙이 갈리면 다시 얹은 화면과 저장소 결과가 달라진다 — 함께 고친다
+function withLocalEdits(d){
+  const ops = loadQueue().ops;
+  if(!ops.length) return d;
+  const out = Object.assign({}, d);
+  const linked = linkedAccounts(d.brokers);
+  for(const op of ops){
+    if(op.op === "hold"){
+      out.holdings = (out.holdings || []).map(h =>
+        h.id === op.id && !linked.has(h.account) ? Object.assign({}, h, { shares:op.shares, avgPrice:op.avgPrice }) : h);
+      continue;
+    }
+    let rows = (out[op.col] || []).filter(r => r.id !== op.id);
+    if(op.op === "put"){
+      if(op.col === "purchases")
+        rows = rows.filter(r => !(r.kw && r.holdingId === op.rec.holdingId && r.date === op.rec.date));
+      rows.push(op.rec);
+    }
+    out[op.col] = rows.sort((a, b) => (a.date || "").localeCompare(b.date || ""));
+  }
+  return out;
+}
+
+function renderQueueNote(){
+  const n = loadQueue().ops.length;
+  const el = document.getElementById("queueCount");
+  el.textContent = n;
+  el.hidden = !n;
+  document.getElementById("syncBtn").title = n ? `지금 갱신 · 보낼 편집 ${n}건` : "지금 갱신";
+}
+
+// 받은 데이터에 내 전송의 처리 결과가 있으면 그 op 를 큐에서 뺀다. 건너뛴 사유를 돌려준다
+function ackEdits(d){
+  const q = loadQueue();
+  const log = Array.isArray(d.editLog) ? d.editLog : [];
+  const skipped = [];
+  q.sent = q.sent.filter(s => {
+    const hit = log.find(e => e.nonce === s.nonce);
+    if(!hit) return true;
+    const done = new Set((hit.applied || []).concat((hit.skipped || []).map(x => x.key)));
+    q.ops = q.ops.filter(o => !(done.has(opKey(o)) && s.revs[opKey(o)] === o.rev));
+    (hit.skipped || []).forEach(x => skipped.push(`${x.key} (${x.why})`));
+    return false;
+  });
+  saveQueue(q);
+  return skipped;
 }
 
 /* touched 는 종목·기록을 사람이 고쳤다는 뜻이다. 받아 온 데이터는 apply 로 통째로
@@ -3360,7 +3458,7 @@ function renderAll(){
   document.getElementById("shortName").checked = state.shortName;
   document.getElementById("blind").checked = state.blind;
   document.getElementById("usdMode").checked = state.usdMode;
-  renderGenNote(); renderDataStatus();
+  renderGenNote(); renderDataStatus(); renderQueueNote();
   // 데이터가 아예 없을 때만 안내를 띄운다 — 계좌 필터로 0건이 된 상태와 구분해야 하므로 state 를 직접 본다
   document.getElementById("firstRun").hidden =
     state.holdings.length > 0 || state.records.length > 0 || state.purchases.length > 0;
@@ -3462,12 +3560,15 @@ document.getElementById("form").onsubmit = e => {
   };
   if(!data.price) data.price = data.avgPrice;
 
+  const before = editId ? state.holdings.find(x => x.id === editId) : null;
   if(editId){
     const i = state.holdings.findIndex(x => x.id === editId);
     state.holdings[i] = data;
   }else{
     state.holdings.push(data);
   }
+  // 수량·평단만 보낸다. 다른 필드는 전송 대상이 아니라 편집 표식으로 덮어쓰기를 묻게 둔다
+  if(before && (before.shares !== data.shares || before.avgPrice !== data.avgPrice)) commitEdits([holdOp(data.id)]);
   save(true); closeModal(); renderAll();
 };
 
@@ -3619,13 +3720,15 @@ document.getElementById("cForm").onsubmit = e => {
   }else{
     state.contributions.push(data);
   }
-  save(true); closeCModal(); renderAll();
+  commitEdits([{ op:"put", col:"contributions", id:data.id, rec:data }]);
+  closeCModal(); renderAll();
 };
 document.getElementById("cDelBtn").onclick = () => {
   const c = state.contributions.find(x => x.id === cEditId);
   if(!c || !confirm(`${c.date} ${ACCOUNTS[c.account]} ${won(c.amount)}원 기록을 삭제할까요?`)) return;
   state.contributions = state.contributions.filter(x => x.id !== cEditId);
-  save(true); closeCModal(); renderAll();
+  commitEdits([{ op:"del", col:"contributions", id:c.id }]);
+  closeCModal(); renderAll();
 };
 document.getElementById("cCancelBtn").onclick = closeCModal;
 document.getElementById("cMask").onclick = e => { if(e.target.id === "cMask") closeCModal(); };
@@ -3692,13 +3795,15 @@ document.getElementById("tForm").onsubmit = e => {
   }else{
     state.trades.push(data);
   }
-  save(true); closeTModal(); renderAll();
+  commitEdits([{ op:"put", col:"trades", id:data.id, rec:data }]);
+  closeTModal(); renderAll();
 };
 document.getElementById("tDelBtn").onclick = () => {
   const t = state.trades.find(x => x.id === tEditId);
   if(!t || !confirm(`${t.date} '${t.name}' 매도 기록을 삭제할까요?`)) return;
   state.trades = state.trades.filter(x => x.id !== tEditId);
-  save(true); closeTModal(); renderAll();
+  commitEdits([{ op:"del", col:"trades", id:t.id }]);
+  closeTModal(); renderAll();
 };
 document.getElementById("tCancelBtn").onclick = closeTModal;
 document.getElementById("tMask").onclick = e => { if(e.target.id === "tMask") closeTModal(); };
@@ -3761,7 +3866,10 @@ document.getElementById("bForm").onsubmit = e => {
   syncHoldingFromBuys(prevId, coveredPrev);
   if(data.holdingId !== prevId) syncHoldingFromBuys(data.holdingId, coveredNext);
 
-  save(true); closeBModal(); renderAll();
+  // 매수 합이 바꾼 수량·평단도 함께 보낸다 — 러너가 옛 수량으로 추정 수령을 만들지 않게
+  commitEdits([{ op:"put", col:"purchases", id:data.id, rec:data },
+    coveredPrev && holdOp(prevId), data.holdingId !== prevId && coveredNext && holdOp(data.holdingId)]);
+  closeBModal(); renderAll();
 };
 document.getElementById("bDelBtn").onclick = () => {
   const p = state.purchases.find(x => x.id === bEditId);
@@ -3770,7 +3878,8 @@ document.getElementById("bDelBtn").onclick = () => {
   state.purchases = state.purchases.filter(x => x.id !== bEditId);
   syncHoldingFromBuys(p.holdingId, covered);
 
-  save(true); closeBModal(); renderAll();
+  commitEdits([{ op:"del", col:"purchases", id:p.id }, covered && holdOp(p.holdingId)]);
+  closeBModal(); renderAll();
 };
 document.getElementById("bCancelBtn").onclick = closeBModal;
 document.getElementById("bMask").onclick = e => { if(e.target.id === "bMask") closeBModal(); };
@@ -3833,6 +3942,8 @@ document.getElementById("firstRunBtn").onclick = () => setTab("more");
 /* ---------- 받아 온 데이터로 갈아타기 ----------
    파일이든 원격이든 apply 는 상태를 통째로 덮는다. 그래서 규칙을 하나로 둔다 —
    잃을 것이 있을 때만 묻는다. 들어올 데이터가 더 오래됐거나, 앱에서 고친 기록이 남았을 때다 */
+// 러너가 건너뛴 편집. 큐에서는 빠지므로 수신 문구로라도 남겨야 조용히 사라지지 않는다
+let skippedEdits = [];
 function adopt(d, where){
   if(!Array.isArray(d.holdings)) throw new Error("holdings 배열이 없습니다");
   const inGen = d.generated || "", myGen = state.generated || "";
@@ -3843,7 +3954,8 @@ function adopt(d, where){
   if(edited) why.push(`${stamp(edited)} 이후 앱에서 고친 종목·납입·매도·매수 기록이 있습니다`);
   if(why.length && !confirm(why.join("\n") + "\n\n덮어쓸까요? 수령 기록은 유지됩니다.")) return false;
 
-  apply(withLocalRecords(d, state.records));
+  skippedEdits = ackEdits(d);
+  apply(withLocalEdits(withLocalRecords(d, state.records)));
   localStorage.removeItem(EDIT_KEY);
   save();
   renderAll();
@@ -3935,7 +4047,9 @@ async function pullRemote(){
       progress("이미 최신 · " + stamp(myGen));
       return;
     }
-    progress(adopt(d, "원격") ? "불러옴 · " + stamp(d.generated) : cfg.repo);
+    const ok = adopt(d, "원격");
+    if(ok && skippedEdits.length) progress("저장소가 받지 않은 편집 " + skippedEdits.join(", "), true);
+    else progress(ok ? "불러옴 · " + stamp(d.generated) : cfg.repo);
   }catch(e){
     // 화면이 멈추면 안 되므로 실패를 삼키고 저장값을 그대로 쓴다
     progress(e.message, true);
@@ -3957,6 +4071,8 @@ function autoPull(){
    폰에서 PC 를 켜지 않고 새 값을 얻는 유일한 경로다. 토큰에 actions:write 가 필요하다.
    dispatch 응답은 실행 id 를 주지 않으므로, 요청 직전 시각보다 뒤에 생긴 실행을 찾는다 */
 const WF_FILE = "update.yml";
+// workflow_dispatch 페이로드 한도 65,535자에서 nonce·키 이름 몫을 뺀다
+const EDITS_MAX = 64000;
 const SYNC_WAIT = 6 * 60 * 1000;
 
 const naptime = ms => new Promise(r => setTimeout(r, ms));
@@ -3970,8 +4086,23 @@ async function syncRemote(){
     const t0 = Date.now();
     const since = t0 - 60000;   // 러너 시계와 어긋나도 이번 실행을 놓치지 않게 여유를 둔다
     progress("갱신 요청…", false, true);
+    const nonce = "app-" + t0.toString(36) + "-" + Math.random().toString(36).slice(2, 6);
+    const inputs = { nonce };
+    const q = loadQueue();
+    // 입력 한도(65,535자) 안에 드는 만큼만 싣고 나머지는 다음 갱신으로 넘긴다
+    const batch = [];
+    for(const op of q.ops){
+      if(JSON.stringify(batch.concat(op)).length > EDITS_MAX) break;
+      batch.push(op);
+    }
+    if(batch.length){
+      inputs.edits = JSON.stringify(batch);
+      // 요청 응답을 못 받아도 러너가 적용했을 수 있으므로 보내기 전에 남긴다
+      q.sent = q.sent.concat({ nonce, revs: Object.fromEntries(batch.map(o => [opKey(o), o.rev])) }).slice(-20);
+      saveQueue(q);
+    }
     const res = await ghFetch(cfg, `actions/workflows/${WF_FILE}/dispatches`,
-      { method:"POST", body: JSON.stringify({ ref:"main" }) });
+      { method:"POST", body: JSON.stringify({ ref:"main", inputs }) });
     if(res.status === 401 || res.status === 403) throw new Error("권한 부족 — 토큰에 actions:write 필요");
     if(res.status === 404) throw new Error("워크플로 없음 — " + WF_FILE);
     if(!res.ok) throw new Error("HTTP " + res.status);
@@ -3983,7 +4114,9 @@ async function syncRemote(){
       const r = await ghFetch(cfg, `actions/workflows/${WF_FILE}/runs?per_page=5`);
       if(!r.ok) throw new Error("실행 조회 실패 — HTTP " + r.status);
       const runs = (await r.json()).workflow_runs || [];
-      run = runs.find(x => new Date(x.created_at).getTime() >= since) || null;
+      // run-name 이 nonce 라 cron·다른 기기 실행과 가려진다. 못 찾으면 시각으로 짐작한다
+      run = runs.find(x => x.display_title === nonce)
+        || runs.find(x => new Date(x.created_at).getTime() >= since) || null;
       if(run && run.status === "completed") break;
       progress(run ? "갱신 중… " + Math.round((Date.now() - t0) / 1000) + "초" : "러너 대기…", false, true);
     }
@@ -4010,6 +4143,8 @@ document.getElementById("pullSaveBtn").onclick = () => {
     .replace(/^https?:\/\/github\.com\//, "").replace(/\.git$/, "").replace(/^\/|\/+$/g, "");
   const token = document.getElementById("pullToken").value.trim();
   localStorage.setItem(PULL_KEY, JSON.stringify({ repo, token }));
+  // 보낼 길이 끊겼는데 큐만 남으면 받은 데이터가 덮을 때 묻지 않는다 — 기존 표식으로 넘긴다
+  if((!repo || !token) && loadQueue().ops.length) save(true);
   document.getElementById("pullCfg").hidden = true;
   renderPullCfg();
 };
